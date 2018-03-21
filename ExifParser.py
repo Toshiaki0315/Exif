@@ -53,4 +53,5 @@ class AnalyzeExifData:
         elif self._byte_order == self.BYTE_ORDER_LITTLE_ENDIAN:
             return struct.unpack_from("<2H2L", data, offset_base+self._0th_ifd_offset+2+offset_info)
         return -1
+
         
