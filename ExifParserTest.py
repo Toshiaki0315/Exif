@@ -49,11 +49,11 @@ class ExifParserTest(unittest.TestCase):
     def test_get_0th_offset(self):
         exif_data = AnalyzeExifData()
         data = struct.pack('>4s2B2s2BL', b'Exif', 0, 0, b'MM', 0, 0, 0x12345678)
-        offset = exif_data.check_exif_string(data)
+        exif_data.check_exif_string(data)
         exif_data.check_byte_order(data)
         self.assertEqual(exif_data.get_0th_offset(data), 0x12345678)
         data = struct.pack('<4s2B2s2BL', b'Exif', 0, 0, b'II', 0, 0, 0x12345678)
-        offset = exif_data.check_exif_string(data)
+        exif_data.check_exif_string(data)
         exif_data.check_byte_order(data)
         self.assertEqual(exif_data.get_0th_offset(data), 0x12345678)
         
