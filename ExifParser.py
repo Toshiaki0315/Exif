@@ -7,12 +7,13 @@ class AnalyzeExifData:
     BYTE_ORDER_BIG_ENDIAN    = ">"
     BYTE_ORDER_ERROR         = "ERR"
 
+    _offset = {"0th":0, "1st":0, "exif":0, "intr":0, "gps":0}
     _byte_order      = BYTE_ORDER_NONE
     _base_offset  = -1
 
     def __init__(self):
         pass
-
+        
     def check_exif_string(self, data):
         self._base_offset = data.decode(encoding='ascii',errors='replace').find('Exif')
         if self._base_offset >= 0:
@@ -41,4 +42,5 @@ class AnalyzeExifData:
     def get_1st_ifd_offset(self, data, offset):
         return struct.unpack_from(self._byte_order+"L", data, self._base_offset+offset)[0]
 
-        
+    def set_offset(self, key, offset):
+        self._offset[key] = offset

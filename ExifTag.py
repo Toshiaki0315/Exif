@@ -2,7 +2,7 @@ class ExifTagInfomation:
 
     def __init__(self):
         pass
-    
+
     EXIF_TAG_ID = {
         # TIFF
         0x0100:"画像の幅",

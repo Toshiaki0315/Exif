@@ -98,5 +98,28 @@ class ExifParserTest(unittest.TestCase):
         exif_data.check_byte_order(data)
         self.assertEqual(exif_data.get_1st_ifd_offset(data, exif_data.get_0th_offset(data)+14), 0x55667788)
 
+    def test_set_offset(self):
+        exif_data = AnalyzeExifData()
+        exif_data.set_offset("0th", 1111)
+        self.assertEqual(exif_data._offset["0th"], 1111)
+        self.assertNotEqual(exif_data._offset["1st"], 1111)
+        self.assertNotEqual(exif_data._offset["exif"], 1111)
+        self.assertNotEqual(exif_data._offset["gps"], 1111)
+        exif_data.set_offset("1st", 2222)
+        self.assertEqual(exif_data._offset["0th"], 1111)
+        self.assertEqual(exif_data._offset["1st"], 2222)
+        self.assertNotEqual(exif_data._offset["exif"], 1111)
+        self.assertNotEqual(exif_data._offset["gps"], 1111)
+        exif_data.set_offset("exif", 3333)
+        self.assertEqual(exif_data._offset["0th"], 1111)
+        self.assertEqual(exif_data._offset["1st"], 2222)
+        self.assertEqual(exif_data._offset["exif"], 3333)
+        self.assertNotEqual(exif_data._offset["gps"], 1111)
+        exif_data.set_offset("gps", 4444)
+        self.assertEqual(exif_data._offset["0th"], 1111)
+        self.assertEqual(exif_data._offset["1st"], 2222)
+        self.assertEqual(exif_data._offset["exif"], 3333)
+        self.assertEqual(exif_data._offset["gps"], 4444)
+        
 if __name__ == '__main__':
     unittest.main()

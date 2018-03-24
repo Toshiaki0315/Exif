@@ -1,6 +1,6 @@
 import sys
 from ExifParser import AnalyzeExifData
-from ExitTag import ExifTagInfomation
+from ExifTag import ExifTagInfomation
 
 def get_tag_number(exif_data, data, offset):
     tag_number = exif_data.get_tag_number(data, offset)
