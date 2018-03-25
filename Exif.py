@@ -2,10 +2,8 @@ import sys
 from ExifParser import AnalyzeExifData
 from ExifTag import ExifTagInfomation
 
-def get_tag_number(exif_data, data, offset):
-    tag_number = exif_data.get_tag_number(data, offset)
-    print('IFD Tag Number = {0}'.format(tag_number))
-    return tag_number
+def display_tag_number(tag_number, ifd):
+    print('{:4s} Tag Number = {:d}'.format(ifd, tag_number))
 
 def display_message(tag_info, ifd):
     print('{:s} : [{:s} len={:d}] 0x{:08x}'.format( \
@@ -18,38 +16,40 @@ def get_0th_ifd(exif_data, data):
 
     offset_ids = {0x8769:"exif", 0x8825:"gps", 0xA005:"intr"}
     exif_data.get_0th_offset(data)
-    tag_number = get_tag_number(exif_data, data, "0th")
+    tag_number = exif_data.get_tag_number(data, "0th")
+    display_tag_number(tag_number, "0th")
 
     for count in range(tag_number):
         tag_info = exif_data.get_tag_info(data, "0th", count)
         display_message(tag_info, "0th")
-        if tag_info[0] in offset_ids:
-            exif_data.set_offset(offset_ids[tag_info[0]], tag_info[3])
+
+    if tag_info[0] in offset_ids:
+        exif_data.set_offset(offset_ids[tag_info[0]], tag_info[3])
     exif_data.get_1st_ifd_offset(data, tag_number)
     
     return
     
 def get_ifd(exif_data, data, ifd):
-    tag_number = get_tag_number(exif_data, data, ifd)
+    tag_number = exif_data.get_tag_number(data, ifd)
+    display_tag_number(tag_number, ifd)
 
     for count in range(tag_number):
         tag_info = exif_data.get_tag_info(data, ifd, count)
         display_message(tag_info, ifd)
 
 def exif(argv):
-    ifd_strings = ["1st", "exif", "gps", "intr"]
+    ifds = ["1st", "exif", "gps", "intr"]
     exif_data = AnalyzeExifData()
 
     with open(argv[0], 'rb') as infile:
         data = infile.read()
 
     exif_data.check_exif_string(data)
-    exif_data.check_byte_order(data)
 
     get_0th_ifd(exif_data, data)
-    for ifd_string in ifd_strings:
-        if exif_data.get_offset(ifd_string) > 0:
-            get_ifd(exif_data, data, ifd_string)
- 
+    for ifd in ifds:
+        if exif_data.get_offset(ifd) > 0:
+            print('{:4s} IFD Offset = 0x{:08x}'.format(ifd, exif_data.get_offset(ifd)))
+            get_ifd(exif_data, data, ifd)
 if __name__ == '__main__':
     exif(sys.argv[1:])

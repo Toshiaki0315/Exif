@@ -10,6 +10,7 @@ class AnalyzeExifData:
     _offset = {"0th":0, "1st":0, "exif":0, "gps":0, "intr":0}
     _byte_order      = BYTE_ORDER_NONE
     _base_offset  = -1
+    _exif_info = {}
 
     def __init__(self):
         pass
@@ -18,6 +19,7 @@ class AnalyzeExifData:
         self._base_offset = data.decode(encoding='ascii',errors='replace').find('Exif')
         if self._base_offset >= 0:
             self._base_offset += (len('Exif')+2)
+            self.check_byte_order(data)
         return self._base_offset
     
     def check_byte_order(self, data):
@@ -42,13 +44,13 @@ class AnalyzeExifData:
         self._offset[key] = offset
 
     def get_offset(self, ifd):
-        if ifd in self._offset and self._offset[ifd] > 0:
-            print('{:4s} IFD Offset = 0x{:08x}'.format(ifd, self._offset[ifd]))
         return self._offset[ifd]
 
     def get_tag_number(self, data, ifd):
-        return struct.unpack_from(self._byte_order+"H", data, self._base_offset+self._offset[ifd])[0]
+        tag_number = struct.unpack_from(self._byte_order+"H", data, self._base_offset+self._offset[ifd])[0]
+        return tag_number
     
     def get_tag_info(self, data, ifd, count):
-        return struct.unpack_from(self._byte_order+"2H2L", data, self._base_offset+self._offset[ifd]+2+count*12)
-    
+        tag_info = struct.unpack_from(self._byte_order+"2H2L", data, self._base_offset+self._offset[ifd]+2+count*12)
+#        self._exif_info.setdefault(ifd, []).append({tag_info[0]:{"Type":tag_info[1], "Len":tag_info[2], "value":tag_info[3]}})           
+        return tag_info
