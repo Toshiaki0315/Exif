@@ -51,6 +51,12 @@ class AnalyzeExifData:
         return tag_number
     
     def get_tag_info(self, data, ifd, count):
+        tag_id_ifds = {0x8769:"exif", 0x8825:"gps", 0xA005:"intr"}
+
         tag_info = struct.unpack_from(self._byte_order+"2H2L", data, self._base_offset+self._offset[ifd]+2+count*12)
-#        self._exif_info.setdefault(ifd, []).append({tag_info[0]:{"Type":tag_info[1], "Len":tag_info[2], "value":tag_info[3]}})           
+        self._exif_info.setdefault(ifd, [] ).append({tag_info[0]:{"Type":tag_info[1], "Len":tag_info[2], "value":tag_info[3]}})
+
+        if tag_info[0] in tag_id_ifds:
+            self._offset[tag_id_ifds[tag_info[0]]] = tag_info[3]
+
         return tag_info

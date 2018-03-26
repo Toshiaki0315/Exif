@@ -14,17 +14,10 @@ def display_message(tag_info, ifd):
 
 def get_0th_ifd(exif_data, data):
 
-    offset_ids = {0x8769:"exif", 0x8825:"gps", 0xA005:"intr"}
     exif_data.get_0th_offset(data)
-    tag_number = exif_data.get_tag_number(data, "0th")
-    display_tag_number(tag_number, "0th")
 
-    for count in range(tag_number):
-        tag_info = exif_data.get_tag_info(data, "0th", count)
-        display_message(tag_info, "0th")
+    tag_number = get_ifd(exif_data, data, "0th")
 
-    if tag_info[0] in offset_ids:
-        exif_data.set_offset(offset_ids[tag_info[0]], tag_info[3])
     exif_data.get_1st_ifd_offset(data, tag_number)
     
     return
@@ -36,6 +29,8 @@ def get_ifd(exif_data, data, ifd):
     for count in range(tag_number):
         tag_info = exif_data.get_tag_info(data, ifd, count)
         display_message(tag_info, ifd)
+    
+    return tag_number
 
 def exif(argv):
     ifds = ["1st", "exif", "gps", "intr"]
