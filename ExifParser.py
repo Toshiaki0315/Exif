@@ -1,6 +1,6 @@
 import struct
 
-class AnalyzeExifData:
+class ParseExifData:
     
     BYTE_ORDER_NONE          = ""
     BYTE_ORDER_LITTLE_ENDIAN = "<"
@@ -54,9 +54,26 @@ class AnalyzeExifData:
         tag_id_ifds = {0x8769:"exif", 0x8825:"gps", 0xA005:"intr"}
 
         tag_info = struct.unpack_from(self._byte_order+"2H2L", data, self._base_offset+self._offset[ifd]+2+count*12)
-        self._exif_info.setdefault(ifd, [] ).append({tag_info[0]:{"Type":tag_info[1], "Len":tag_info[2], "value":tag_info[3]}})
+        self._exif_info.setdefault(ifd, [] ).append({"id":tag_info[0], "type":tag_info[1], "len":tag_info[2], "value":tag_info[3]})
 
         if tag_info[0] in tag_id_ifds:
             self._offset[tag_id_ifds[tag_info[0]]] = tag_info[3]
 
         return tag_info
+
+    def parse_ifd(self, data, ifd):
+
+        for count in range(self.get_tag_number(data, ifd)):
+            self.get_tag_info(data, ifd, count)
+        
+        return
+
+    def parse_0th_ifd(self, data):
+
+        self.get_0th_offset(data)
+
+        self.parse_ifd(data, "0th")
+
+        self.get_1st_ifd_offset(data, len(self._exif_info["0th"]))
+        
+        return
