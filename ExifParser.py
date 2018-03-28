@@ -23,13 +23,14 @@ class ParseExifData:
         return self._base_offset
     
     def check_byte_order(self, data):
+        bye_orders = {b'MM':self.BYTE_ORDER_BIG_ENDIAN, b'II':self.BYTE_ORDER_LITTLE_ENDIAN}
+
         byte_order = struct.unpack_from("2s", data, self._base_offset)
-        if byte_order[0] == b'MM':
-            self._byte_order = self.BYTE_ORDER_BIG_ENDIAN
-        elif byte_order[0] == b'II':
-            self._byte_order = self.BYTE_ORDER_LITTLE_ENDIAN
+        if byte_order[0] in bye_orders:
+            self._byte_order = bye_orders[byte_order[0]]
         else:
             self._byte_order = self.BYTE_ORDER_ERROR
+
         return
 
     def get_0th_offset(self, data):
