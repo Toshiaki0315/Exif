@@ -17,8 +17,8 @@
 # ■ リトルエンディアンでgpsのオフセットを取得できる
 # ■ ビッグエンディアンでintrのオフセットを取得できる
 # ■ リトルエンディアンでintrのオフセットを取得できる
-# ■ ビッグエンディアンで0th,1st,exif,gps,intrのオフセットを設定できる
-# ■ リトルエンディアンで0th,1st,exif,gps,intrのオフセットを設定できる
+# × ビッグエンディアンで0th,1st,exif,gps,intrのオフセットを設定できる
+# × リトルエンディアンで0th,1st,exif,gps,intrのオフセットを設定できる
 
 
 import unittest
@@ -159,29 +159,6 @@ class ExifParserTest(unittest.TestCase):
         exif_data.get_1st_ifd_offset(data, 1)
         exif_data.get_tag_info(data, "0th", 0)
         self.assertEqual(exif_data._offset["intr"], 0xaabbccdd)
-        
-    def test_set_offset(self):
-        exif_data = ParseExifData()
-        exif_data.set_offset("0th", 1111)
-        self.assertEqual(exif_data._offset["0th"], 1111)
-        self.assertNotEqual(exif_data._offset["1st"], 1111)
-        self.assertNotEqual(exif_data._offset["exif"], 1111)
-        self.assertNotEqual(exif_data._offset["gps"], 1111)
-        exif_data.set_offset("1st", 2222)
-        self.assertEqual(exif_data._offset["0th"], 1111)
-        self.assertEqual(exif_data._offset["1st"], 2222)
-        self.assertNotEqual(exif_data._offset["exif"], 1111)
-        self.assertNotEqual(exif_data._offset["gps"], 1111)
-        exif_data.set_offset("exif", 3333)
-        self.assertEqual(exif_data._offset["0th"], 1111)
-        self.assertEqual(exif_data._offset["1st"], 2222)
-        self.assertEqual(exif_data._offset["exif"], 3333)
-        self.assertNotEqual(exif_data._offset["gps"], 1111)
-        exif_data.set_offset("gps", 4444)
-        self.assertEqual(exif_data._offset["0th"], 1111)
-        self.assertEqual(exif_data._offset["1st"], 2222)
-        self.assertEqual(exif_data._offset["exif"], 3333)
-        self.assertEqual(exif_data._offset["gps"], 4444)
         
 if __name__ == '__main__':
     unittest.main()

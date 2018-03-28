@@ -41,9 +41,6 @@ class ParseExifData:
         self._offset["1st"] = struct.unpack_from(self._byte_order+"L", data, self._base_offset+self._offset["0th"]+2+tag_num*12)[0]
         return
 
-    def set_offset(self, key, offset):
-        self._offset[key] = offset
-
     def get_offset(self, ifd):
         return self._offset[ifd]
 
