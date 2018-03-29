@@ -225,6 +225,6 @@ class ExifTagInfomation:
             fmt = str(length)+"s"
             value_string = "".join(map(str, struct.unpack_from(fmt, data, offset+value)))
         else:
-            value_string = hex(value)
+            value_string = str(value)
 
         return value_string
