@@ -1,3 +1,5 @@
+import struct
+
 class ExifTagInfomation:
 
     def __init__(self):
@@ -208,3 +210,21 @@ class ExifTagInfomation:
             return self.EXIF_TAG_FORMAT[format]
         else:
             return "unkown format"
+
+
+    def int_to_string( self, length, value ):
+        return value.to_bytes(length, byteorder='big').decode("ascii").strip('\x00')
+
+
+    def change_value( self, value_type, length, value, data, offset ):
+        # valueには4byte以下であれば値、5byte以上であればオフセットが入ってる
+        # オフセットはtiffヘッダの先頭からのオフセット
+        if (value_type == 2 or value_type == 7) and length <= 4:
+            value_string = self.int_to_string(length, value)
+        elif value_type == 2:
+            fmt = str(length)+"s"
+            value_string = "".join(map(str, struct.unpack_from(fmt, data, offset+value)))
+        else:
+            value_string = hex(value)
+
+        return value_string
