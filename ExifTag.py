@@ -216,14 +216,31 @@ class ExifTagInfomation:
         return value.to_bytes(length, byteorder='big').decode("ascii").strip('\x00')
 
 
+    def change_ascii_to_value( self, value_type, length, value, data, offset ):
+        if length <= 4:
+            value_string = self.int_to_string(length, value)
+        else:
+            fmt = str(length)+"s"
+            value_string = "".join(map(str, struct.unpack_from(fmt, data, offset+value)))
+        return value_string
+
+
+    def change_undefined_to_value( self, value_type, length, value, data, offset ):
+        if length <= 4:
+            value_string = self.int_to_string(length, value)
+        else:
+#            fmt = str(length)+"s"
+#            value_string = "".join(map(str, struct.unpack_from(fmt, data, offset+value)))
+            value_string = ""
+        return value_string
+        
     def change_value( self, value_type, length, value, data, offset ):
         # valueには4byte以下であれば値、5byte以上であればオフセットが入ってる
         # オフセットはtiffヘッダの先頭からのオフセット
-        if (value_type == 2 or value_type == 7) and length <= 4:
-            value_string = self.int_to_string(length, value)
-        elif value_type == 2:
-            fmt = str(length)+"s"
-            value_string = "".join(map(str, struct.unpack_from(fmt, data, offset+value)))
+        if self.EXIF_TAG_FORMAT[value_type] == "ASCII":
+            value_string = self.change_ascii_to_value( value_type, length, value, data, offset )
+        elif self.EXIF_TAG_FORMAT[value_type] == "UNDEFINED":
+            value_string = self.change_undefined_to_value( value_type, length, value, data, offset )
         else:
             value_string = str(value)
 
