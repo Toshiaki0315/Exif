@@ -9,7 +9,7 @@ class Int2StringTest(unittest.TestCase):
 
     def test_int_to_string(self):
         self.assertEqual( Int2String().int_to_string( 0x30313233 ), "0123" )
-
+        self.assertEqual( Int2String().int_to_string( 0x61626364 ), "abcd" )
 
 if __name__ == '__main__':
     unittest.main()
