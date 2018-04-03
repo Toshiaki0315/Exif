@@ -10,16 +10,23 @@ class ExifTagInfomation:
         0x0100:{"mes":"画像の幅"},
         0x0101:{"mes":"画像の高さ"},
         0x0102:{"mes":"画像のビットの深さ"},
-        0x0103:{"mes":"圧縮の種類"},
-        0x0106:{"mes":"画素構成"},
-        0x0112:{"mes":"画像方向"},
+        0x0103:{"mes":"圧縮の種類", "value":{1:"非圧縮", 6:"JPEG 圧縮(サムネイルのみ)"}},
+        0x0106:{"mes":"画素構成", "value":{2:"RGB", 6:"YCbCr"}},
+        0x0112:{"mes":"画像方向", "value":{1:"visual top    / visual left-hand side",  \
+                                          2:"visual top    / visual right-hand side", \
+                                          3:"visual bottom / visual right-hand side", \
+                                          4:"visual bottom / visual left-hand side",  \
+                                          5:"visual left-hand side  / visual top",    \
+                                          6:"visual right-hand side / visual top",    \
+                                          7:"visual right-hand side / visual bottom", \
+                                          8:"visual left-hand side  / visual bottom" }},
         0x0115:{"mes":"コンポーネント数"},
-        0x011C:{"mes":"画像データの並び"},
+        0x011C:{"mes":"画像データの並び", "value":{1:"点順次(chunky)フォーマット", 2:"面順次(planar)フォーマット"}},
         0x0212:{"mes":"YCCの面構成(C)"},
-        0x0213:{"mes":"YCCの面構成(YC)"},
+        0x0213:{"mes":"YCCの面構成(YC)", "value":{1:"中心", 2:"一致(co-sited)"}},
         0x011A:{"mes":"画像の幅の解像度"},
         0x011B:{"mes":"画像の高さの解像度"},
-        0x0128:{"mes":"画像の幅と高さの解像度の単位"},
+        0x0128:{"mes":"画像の幅と高さの解像度の単位", "value":{2:"インチ", 3:"センチメートル"}},
         0x0111:{"mes":"画像データのロケーション"},
         0x0116:{"mes":"ストリップ中のライン数"},
         0x0117:{"mes":"ストリップのデータ量"},
@@ -180,14 +187,23 @@ class ExifTagInfomation:
         tag_lists = {"0th":self.EXIF_TAG_ID, "1st":self.EXIF_TAG_ID, "gps":self.GPS_TAG_ID, "intr":self.INTR_TAG_ID, }
 
         if ifd in tag_lists:
-            exif_tag_id = tag_lists[ifd]
-            if tag_id in exif_tag_id:
-                return exif_tag_id[tag_id]["mes"]
+            if tag_id in tag_lists[ifd]:
+                return tag_lists[ifd][tag_id]["mes"]
             else:
                 return "unkown ID"
         else:
             return "unkown IFD"
-    
+    def change_value_to_string(self, ifd, tag_id, value):
+        tag_lists = {"0th":self.EXIF_TAG_ID, "1st":self.EXIF_TAG_ID, "gps":self.GPS_TAG_ID, "intr":self.INTR_TAG_ID, }
+
+        if ifd in tag_lists:
+            if tag_id in tag_lists[ifd]:
+                if value in tag_lists[ifd][tag_id]["value"]:
+                    return tag_lists[ifd][tag_id]["value"][value]
+                else:
+                    return "予約"
+        
+
     EXIF_TAG_FORMAT = {
         1:"BYTE",
         2:"ASCII",
