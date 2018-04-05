@@ -240,33 +240,40 @@ class ExifTagInfomation:
         0x1002:{"mes":"関連画像高さ"},
     }
 
+    TAG_LIST = {
+        "0th":EXIF_TAG_ID,
+        "1st":EXIF_TAG_ID,
+        "exif":EXIF_TAG_ID,
+        "gps":GPS_TAG_ID,
+        "intr":INTR_TAG_ID,
+    }
+    
     def change_id_to_string(self, ifd, tag_id):
-        tag_lists = {"0th":self.EXIF_TAG_ID, "1st":self.EXIF_TAG_ID, "exif":self.EXIF_TAG_ID, "gps":self.GPS_TAG_ID, "intr":self.INTR_TAG_ID, }
 
-        if ifd not in tag_lists:
+        if ifd not in self.TAG_LIST:
             return "unkown IFD"
     
-        elif tag_id in tag_lists[ifd]:
-            return tag_lists[ifd][tag_id]["mes"]
-        else:
-            return "unkown ID"
+        if tag_id in self.TAG_LIST[ifd]:
+            return self.TAG_LIST[ifd][tag_id]["mes"]
+
+        return "unkown ID"
             
 
     def change_value_to_string(self, ifd, tag_id, value):
-        tag_lists = {"0th":self.EXIF_TAG_ID, "1st":self.EXIF_TAG_ID, "exif":self.EXIF_TAG_ID, "gps":self.GPS_TAG_ID, "intr":self.INTR_TAG_ID, }
-        if ifd not in tag_lists:
+
+        if ifd not in self.TAG_LIST:
             return str(value)
 
-        if tag_id not in tag_lists[ifd]:
+        if tag_id not in self.TAG_LIST[ifd]:
             return "unkown id"
 
-        if "value" not in tag_lists[ifd][tag_id]:
+        if "value" not in self.TAG_LIST[ifd][tag_id]:
             return str(value)
 
-        if value in tag_lists[ifd][tag_id]["value"]:
-            return tag_lists[ifd][tag_id]["value"][value]
-        else:
-            return "予約"
+        if value in self.TAG_LIST[ifd][tag_id]["value"]:
+            return self.TAG_LIST[ifd][tag_id]["value"][value]
+
+        return "予約"
         
 
     EXIF_TAG_FORMAT = {
@@ -287,14 +294,12 @@ class ExifTagInfomation:
     def is_offset(self, length):
         if length <= 4:
             return False
-        else:
-            return True
+        return True
     
     def change_format_to_string(self, format):
         if format in self.EXIF_TAG_FORMAT:
             return self.EXIF_TAG_FORMAT[format]
-        else:
-            return "unkown format"
+        return "unkown format"
 
 
     def int_to_string( self, length, value ):
@@ -303,41 +308,38 @@ class ExifTagInfomation:
 
     def change_ascii_to_value( self, length, value, data, offset ):
         if self.is_offset(length):
-            value_string = "".join(map(str, struct.unpack_from(str(length)+"s", data, offset+value)))
-        else:
-            value_string = self.int_to_string(length, value)
-            
-        return value_string
+            return "".join(map(str, struct.unpack_from(str(length)+"s", data, offset+value)))
+
+        return self.int_to_string(length, value)
 
 
     def change_undefined_to_value( self, length, value, data, offset ):
         if self.is_offset(length):
 #            fmt = str(length)+"s"
 #            value_string = "".join(map(str, struct.unpack_from(fmt, data, offset+value)))
-            value_string = ""
-        else:
-            value_string = self.int_to_string(length, value)
+            return ""
 
-        return value_string
+        return self.int_to_string(length, value)
+
 
     def change_short_to_value( self, value_type, tag_id, length, value, data, offset):
         if self.is_offset(length):
-            value_string = str(value)
-        else:
-            value_string = self.change_value_to_string( value_type, tag_id, value )
+            return str(value)
 
-        return value_string
+        return self.change_value_to_string( value_type, tag_id, value )
+
 
     def change_value( self, ifd, exif_data, data, offset ):
         # valueには4byte以下であれば値、5byte以上であればオフセットが入ってる
         # オフセットはtiffヘッダの先頭からのオフセット
         if self.EXIF_TAG_FORMAT[exif_data["type"]] == "ASCII":
-            value_string = self.change_ascii_to_value( exif_data["len"], exif_data["value"], data, offset )
-        elif self.EXIF_TAG_FORMAT[exif_data["type"]] == "UNDEFINED":
-            value_string = self.change_undefined_to_value( exif_data["len"], exif_data["value"], data, offset )
-        elif self.EXIF_TAG_FORMAT[exif_data["type"]] == "SHORT":
-            value_string = self.change_short_to_value( ifd, exif_data["id"], exif_data["len"], exif_data["value"], data, offset )
-        else:
-            value_string = str(exif_data["value"])
+            return self.change_ascii_to_value( exif_data["len"], exif_data["value"], data, offset )
+        
+        if self.EXIF_TAG_FORMAT[exif_data["type"]] == "UNDEFINED":
+            return self.change_undefined_to_value( exif_data["len"], exif_data["value"], data, offset )
+        
+        if self.EXIF_TAG_FORMAT[exif_data["type"]] == "SHORT":
+            return self.change_short_to_value( ifd, exif_data["id"], exif_data["len"], exif_data["value"], data, offset )
 
-        return value_string
+        return str(exif_data["value"])
+

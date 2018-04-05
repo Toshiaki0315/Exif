@@ -14,11 +14,9 @@ def adjust_message(pos, digit, message):
             digit -= 1
 
     if pos == ADJUST_LEFT:
-        adjust_message = message + ' ' * digit
-    else:
-        adjust_message = ' ' * digit + message
-        
-    return adjust_message
+        return message + ' ' * digit
+
+    return ' ' * digit + message
 
 def display_message(exif_data, data, ifd):
 
