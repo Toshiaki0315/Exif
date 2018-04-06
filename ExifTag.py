@@ -1,6 +1,6 @@
 import struct
 
-class ExifTagInfomation:
+class ExifTagInformation:
 
     def __init__(self):
         pass
@@ -302,15 +302,15 @@ class ExifTagInfomation:
         return "unkown format"
 
 
-    def int_to_string( self, length, value ):
+    def change_int_to_string( self, length, value ):
         return value.to_bytes(length, byteorder='big').decode("ascii").strip('\x00')
 
 
     def change_ascii_to_value( self, length, value, data, offset ):
         if self.is_offset(length):
-            return "".join(map(str, struct.unpack_from(str(length)+"s", data, offset+value)))
+            return data.decode(encoding='ascii', errors='replace').strip('\x00')[offset:offset+length]
 
-        return self.int_to_string(length, value)
+        return self.change_int_to_string(length, value)
 
 
     def change_undefined_to_value( self, length, value, data, offset ):
@@ -319,7 +319,7 @@ class ExifTagInfomation:
 #            value_string = "".join(map(str, struct.unpack_from(fmt, data, offset+value)))
             return ""
 
-        return self.int_to_string(length, value)
+        return self.change_int_to_string(length, value)
 
 
     def change_short_to_value( self, value_type, tag_id, length, value, data, offset):
