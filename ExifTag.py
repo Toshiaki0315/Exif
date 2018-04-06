@@ -308,8 +308,10 @@ class ExifTagInformation:
 
     def change_ascii_to_value( self, length, value, data, offset ):
         if self.is_offset(length):
-            return data.decode(encoding='ascii', errors='replace').strip('\x00')[offset:offset+length]
-
+            print(length)
+            print(offset)
+            print(value)
+            return data.decode(encoding='ascii', errors='replace')[offset+value:offset+value+length].strip('\x00')
         return self.change_int_to_string(length, value)
 
 
