@@ -42,16 +42,16 @@ def exif(argv):
         data = infile.read()
 
     ifds = ["0th", "1st", "exif", "gps", "intr"]
-    exif_data = ParseExifData()
+    exif_data = ParseExifData(data)
 
-    exif_data.check_exif_string(data)
+    exif_data.check_exif_string()
 
     for ifd in ifds:
         if ifd == "0th":
-            exif_data.parse_0th_ifd(data)
+            exif_data.parse_0th_ifd()
             display_message(exif_data, data, ifd)
         elif exif_data.get_offset(ifd) > 0:
-            exif_data.parse_ifd(data, ifd)
+            exif_data.parse_ifd(ifd)
             display_message(exif_data, data, ifd)
 
 

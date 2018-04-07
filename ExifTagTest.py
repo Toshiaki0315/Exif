@@ -37,7 +37,7 @@ class ExifParserTest(unittest.TestCase):
         self.assertEqual(exif_info.change_value_to_string(), "JPEG 圧縮(サムネイルのみ)")
         exif_data = {"id":0x0103, "type":0, "value":0, "len":0}
         exif_info = ExifTagInformation("0th", exif_data)
-        self.assertEqual(exif_info.change_value_to_string(), "予約")
+        self.assertEqual(exif_info.change_value_to_string(), "unkown value")
         exif_data = {"id":0x1001, "type":0, "value":1, "len":0}
         exif_info = ExifTagInformation("intr", exif_data)
         self.assertEqual(exif_info.change_value_to_string(), "1")
