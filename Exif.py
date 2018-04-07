@@ -24,9 +24,10 @@ def display_message(exif_data, data, ifd):
     print('{:4s} IFD Offset = 0x{:08x}'.format(ifd, exif_data.get_offset(ifd)))
     print('{:4s} Tag Number = {:d}'.format(ifd, len(exif_data._exif_info[ifd])))
     
+    byte_order = exif_data.exif_byte_order()
     for count in range(len(exif_data._exif_info[ifd])):
         
-        exif_info = ExifTagInformation(ifd, exif_data._exif_info[ifd][count])
+        exif_info = ExifTagInformation(ifd, byte_order, exif_data._exif_info[ifd][count])
         value = exif_info.change_value( data, exif_data._base_offset)
 
         print('{:s} : [{:s} len = {:6d}] (0x{:08x}) : {:s}'.format( \

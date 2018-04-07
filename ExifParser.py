@@ -75,3 +75,6 @@ class ParseExifData:
         self.get_1st_ifd_offset(len(self._exif_info["0th"]))
         
         return
+
+    def exif_byte_order(self):
+        return self._byte_order

@@ -2,17 +2,19 @@ import struct
 
 class ExifTagInformation:
 
-    __ifd    = ""
-    __id     = 0
-    __type   = 0
-    __length = 0
-    __value  = 0
-    def __init__(self, ifd, exif_info):
-        self.__ifd    = ifd
-        self.__id     = exif_info["id"]
-        self.__type   = exif_info["type"]
-        self.__length = exif_info["len"]
-        self.__value  = exif_info["value"]
+    __ifd        = ""
+    __byte_order = ""
+    __id         = 0
+    __type       = 0
+    __length     = 0
+    __value      = 0
+    def __init__(self, ifd, byte_order, exif_info):
+        self.__ifd        = ifd
+        self.__byte_order = byte_order
+        self.__id         = exif_info["id"]
+        self.__type       = exif_info["type"]
+        self.__length     = exif_info["len"]
+        self.__value      = exif_info["value"]
 
     EXIF_TAG_ID = {
         # TIFF
@@ -338,6 +340,18 @@ class ExifTagInformation:
 
         return self.change_value_to_string()
 
+    def change_rational_to_value(self, data, offset):
+        value_offset = offset + self.__value
+        # RATIONALの場合は、1つめに分子、2つめに分母が入っているので、lengthを2倍にして値を取得している
+        values = struct.unpack_from(self.__byte_order+str(self.__length*2)+"L", data, value_offset)
+        if values[0] == 0 and values[1] == 0:
+            value_string = "{:d}.{:d}".format(values[0], values[1])
+        elif values[1] == 1:
+            value_string = "{:d}".format(values[0])
+        else:
+            value_string = "{:d} / {:d}".format(values[0], values[1])
+
+        return value_string
 
     def change_value(self, data, offset):
         # valueには4byte以下であれば値、5byte以上であればオフセットが入ってる
@@ -350,6 +364,9 @@ class ExifTagInformation:
         
         if self.EXIF_TAG_FORMAT[self.__type] == "SHORT":
             return self.change_short_to_value(data, offset)
+
+        if self.EXIF_TAG_FORMAT[self.__type] == "RATIONAL":
+            return self.change_rational_to_value(data, offset)
 
         return str(self.__value)
 
