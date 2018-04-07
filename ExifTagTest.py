@@ -3,42 +3,112 @@ from ExifTag import ExifTagInformation
 
 class ExifParserTest(unittest.TestCase):
     def test_change_id_to_string(self):
-        self.assertEqual(ExifTagInformation().change_id_to_string("0th", 0x0000), "unkown ID")
-        self.assertEqual(ExifTagInformation().change_id_to_string("exif", 0x0100), "画像の幅")
-        self.assertEqual(ExifTagInformation().change_id_to_string("0th", 0x0100), "画像の幅")
-        self.assertEqual(ExifTagInformation().change_id_to_string("1st", 0x0100), "画像の幅")
-        self.assertEqual(ExifTagInformation().change_id_to_string("gps", 0x0100), "unkown ID")
-        self.assertEqual(ExifTagInformation().change_id_to_string("gps", 0x0001), "北緯(N) or 南緯(S)")
-        self.assertEqual(ExifTagInformation().change_id_to_string("intr", 0x0100), "unkown ID")
-        self.assertEqual(ExifTagInformation().change_id_to_string("intr", 0x0001), "互換性インデックス")
+        exif_data = {"id":0x0000, "type":0, "value":0, "len":0}
+        exif_info = ExifTagInformation("0th", exif_data)
+        self.assertEqual(exif_info.change_id_to_string(), "unkown ID")
+        exif_data = {"id":0x0100, "type":0, "value":0, "len":0}
+        exif_info = ExifTagInformation("exif", exif_data)
+        self.assertEqual(exif_info.change_id_to_string(), "画像の幅")
+        exif_data = {"id":0x0100, "type":0, "value":0, "len":0}
+        exif_info = ExifTagInformation("0th", exif_data)
+        self.assertEqual(exif_info.change_id_to_string(), "画像の幅")
+        exif_data = {"id":0x0100, "type":0, "value":0, "len":0}
+        exif_info = ExifTagInformation("1st", exif_data)
+        self.assertEqual(exif_info.change_id_to_string(), "画像の幅")
+        exif_data = {"id":0x0100, "type":0, "value":0, "len":0}
+        exif_info = ExifTagInformation("gps", exif_data)
+        self.assertEqual(exif_info.change_id_to_string(), "unkown ID")
+        exif_data = {"id":0x0001, "type":0, "value":0, "len":0}
+        exif_info = ExifTagInformation("gps", exif_data)
+        self.assertEqual(exif_info.change_id_to_string(), "北緯(N) or 南緯(S)")
+        exif_data = {"id":0x0100, "type":0, "value":0, "len":0}
+        exif_info = ExifTagInformation("intr", exif_data)
+        self.assertEqual(exif_info.change_id_to_string(), "unkown ID")
+        exif_data = {"id":0x0001, "type":0, "value":0, "len":0}
+        exif_info = ExifTagInformation("intr", exif_data)
+        self.assertEqual(exif_info.change_id_to_string(), "互換性インデックス")
 
     def test_change_value_to_string(self):
-        self.assertEqual(ExifTagInformation().change_value_to_string("0th", 0x0103, 1), "非圧縮")
-        self.assertEqual(ExifTagInformation().change_value_to_string("0th", 0x0103, 6), "JPEG 圧縮(サムネイルのみ)")
-        self.assertEqual(ExifTagInformation().change_value_to_string("0th", 0x0103, 0), "予約")
-        self.assertEqual(ExifTagInformation().change_value_to_string("intr", 0x1001, 1), "1")
+        exif_data = {"id":0x0103, "type":0, "value":1, "len":0}
+        exif_info = ExifTagInformation("0th", exif_data)
+        self.assertEqual(exif_info.change_value_to_string(), "非圧縮")
+        exif_data = {"id":0x0103, "type":0, "value":6, "len":0}
+        exif_info = ExifTagInformation("0th", exif_data)
+        self.assertEqual(exif_info.change_value_to_string(), "JPEG 圧縮(サムネイルのみ)")
+        exif_data = {"id":0x0103, "type":0, "value":0, "len":0}
+        exif_info = ExifTagInformation("0th", exif_data)
+        self.assertEqual(exif_info.change_value_to_string(), "予約")
+        exif_data = {"id":0x1001, "type":0, "value":1, "len":0}
+        exif_info = ExifTagInformation("intr", exif_data)
+        self.assertEqual(exif_info.change_value_to_string(), "1")
 
     def test_change_format_to_string(self):
-        self.assertEqual(ExifTagInformation().change_format_to_string(0), "unkown format")
-        self.assertEqual(ExifTagInformation().change_format_to_string(1), "BYTE")
-        self.assertEqual(ExifTagInformation().change_format_to_string(2), "ASCII")
-        self.assertEqual(ExifTagInformation().change_format_to_string(3), "SHORT")
-        self.assertEqual(ExifTagInformation().change_format_to_string(4), "LONG")
-        self.assertEqual(ExifTagInformation().change_format_to_string(5), "RATIONAL")
-        self.assertEqual(ExifTagInformation().change_format_to_string(6), "SBYTE")
-        self.assertEqual(ExifTagInformation().change_format_to_string(7), "UNDEFINED")
-        self.assertEqual(ExifTagInformation().change_format_to_string(8), "SSHORT")
-        self.assertEqual(ExifTagInformation().change_format_to_string(9), "SLONG")
-        self.assertEqual(ExifTagInformation().change_format_to_string(10), "SRATIONAL")
-        self.assertEqual(ExifTagInformation().change_format_to_string(11), "SINGLE FLOAT")
-        self.assertEqual(ExifTagInformation().change_format_to_string(12), "DOUBLE FLOAT")
+        exif_data = {"id":0, "type":0, "value":0, "len":0}
+        exif_info = ExifTagInformation("0th", exif_data)
+        self.assertEqual(exif_info.change_format_to_string(), "unkown format")
+        exif_data = {"id":0, "type":1, "value":0, "len":0}
+        exif_info = ExifTagInformation("0th", exif_data)
+        self.assertEqual(exif_info.change_format_to_string(), "BYTE")
+        exif_data = {"id":0, "type":2, "value":0, "len":0}
+        exif_info = ExifTagInformation("0th", exif_data)
+        self.assertEqual(exif_info.change_format_to_string(), "ASCII")
+        exif_data = {"id":0, "type":3, "value":0, "len":0}
+        exif_info = ExifTagInformation("0th", exif_data)
+        self.assertEqual(exif_info.change_format_to_string(), "SHORT")
+        exif_data = {"id":0, "type":4, "value":0, "len":0}
+        exif_info = ExifTagInformation("0th", exif_data)
+        self.assertEqual(exif_info.change_format_to_string(), "LONG")
+        exif_data = {"id":0, "type":5, "value":0, "len":0}
+        exif_info = ExifTagInformation("0th", exif_data)
+        self.assertEqual(exif_info.change_format_to_string(), "RATIONAL")
+        exif_data = {"id":0, "type":6, "value":0, "len":0}
+        exif_info = ExifTagInformation("0th", exif_data)
+        self.assertEqual(exif_info.change_format_to_string(), "SBYTE")
+        exif_data = {"id":0, "type":7, "value":0, "len":0}
+        exif_info = ExifTagInformation("0th", exif_data)
+        self.assertEqual(exif_info.change_format_to_string(), "UNDEFINED")
+        exif_data = {"id":0, "type":8, "value":0, "len":0}
+        exif_info = ExifTagInformation("0th", exif_data)
+        self.assertEqual(exif_info.change_format_to_string(), "SSHORT")
+        exif_data = {"id":0, "type":9, "value":0, "len":0}
+        exif_info = ExifTagInformation("0th", exif_data)
+        self.assertEqual(exif_info.change_format_to_string(), "SLONG")
+        exif_data = {"id":0, "type":10, "value":0, "len":0}
+        exif_info = ExifTagInformation("0th", exif_data)
+        self.assertEqual(exif_info.change_format_to_string(), "SRATIONAL")
+        exif_data = {"id":0, "type":11, "value":0, "len":0}
+        exif_info = ExifTagInformation("0th", exif_data)
+        self.assertEqual(exif_info.change_format_to_string(), "SINGLE FLOAT")
+        exif_data = {"id":0, "type":12, "value":0, "len":0}
+        exif_info = ExifTagInformation("0th", exif_data)
+        self.assertEqual(exif_info.change_format_to_string(), "DOUBLE FLOAT")
 
     def test_change_int_to_string(self):
-        self.assertEqual(ExifTagInformation().change_int_to_string(4, 0x31323334), "1234")
+        exif_data = {"id":0, "type":0, "value":0x31323334, "len":4}
+        exif_info = ExifTagInformation("0th", exif_data)
+        self.assertEqual(exif_info.change_int_to_string(), "1234")
         
     def test_change_ascii_to_value(self):
-        self.assertEqual(ExifTagInformation().change_ascii_to_value(6, 0, b'\x31\x32\x33\x34\x35\x00', 0), "12345")
-        self.assertEqual(ExifTagInformation().change_ascii_to_value(6, 0, b'\x61\x62\x63\x64\x65\x00', 0), "abcde")
+        exif_data = {"id":0, "type":0, "value":0, "len":6}
+        exif_info = ExifTagInformation("0th", exif_data)
+        self.assertEqual(exif_info.change_ascii_to_value(b'\x31\x32\x33\x34\x35\x00', 0), "12345")
+        self.assertEqual(exif_info.change_ascii_to_value(b'\x61\x62\x63\x64\x65\x00', 0), "abcde")
 
+    def test_exif_tag_length(self):
+        exif_data = {"id":0, "type":0, "value":0, "len":6}
+        exif_info = ExifTagInformation("0th", exif_data)
+        self.assertEqual(exif_info.exif_tag_length(), 6)
+        exif_data = {"id":0, "type":0, "value":0, "len":0}
+        exif_info = ExifTagInformation("0th", exif_data)
+        self.assertEqual(exif_info.exif_tag_length(), 0)
+        
+    def test_exif_tag_value(self):
+        exif_data = {"id":0, "type":0, "value":0, "len":0}
+        exif_info = ExifTagInformation("0th", exif_data)
+        self.assertEqual(exif_info.exif_tag_value(), 0)
+        exif_data = {"id":0, "type":0, "value":0xffff, "len":0}
+        exif_info = ExifTagInformation("0th", exif_data)
+        self.assertEqual(exif_info.exif_tag_value(), 0xffff)
+        
 if __name__ == '__main__':
     unittest.main()

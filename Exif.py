@@ -25,16 +25,15 @@ def display_message(exif_data, data, ifd):
     print('{:4s} Tag Number = {:d}'.format(ifd, len(exif_data._exif_info[ifd])))
     
     for count in range(len(exif_data._exif_info[ifd])):
-        value = ExifTagInformation().change_value( ifd, \
-                                                exif_data._exif_info[ifd][count],\
-                                                data, \
-                                                exif_data._base_offset)
+        
+        exif_info = ExifTagInformation(ifd, exif_data._exif_info[ifd][count])
+        value = exif_info.change_value( data, exif_data._base_offset)
 
         print('{:s} : [{:s} len = {:6d}] (0x{:08x}) : {:s}'.format( \
-                                                adjust_message(ADJUST_LEFT, 30, ExifTagInformation().change_id_to_string(ifd, exif_data._exif_info[ifd][count]["id"])), \
-                                                adjust_message(ADJUST_LEFT, 10, ExifTagInformation().change_format_to_string(exif_data._exif_info[ifd][count]["type"])), \
-                                                exif_data._exif_info[ifd][count]["len"], \
-                                                exif_data._exif_info[ifd][count]["value"], \
+                                                adjust_message(ADJUST_LEFT, 30, exif_info.change_id_to_string()), \
+                                                adjust_message(ADJUST_LEFT, 10, exif_info.change_format_to_string()), \
+                                                exif_info.exif_tag_length(), \
+                                                exif_info.exif_tag_value(), \
                                                 value))
 
 
