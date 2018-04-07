@@ -314,7 +314,8 @@ class ExifTagInformation:
 
 
     def change_int_to_string(self):
-        return self.__value.to_bytes(self.__length, byteorder='big').decode("ascii").strip('\x00')
+        byte_oders = {"<":'little', ">":'big'}
+        return self.__value.to_bytes(self.__length, byteorder=byte_oders[self.__byte_order]).decode("ascii").strip('\x00')
 
 
     def change_ascii_to_value(self, data, offset):
