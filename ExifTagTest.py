@@ -121,5 +121,50 @@ class ExifParserTest(unittest.TestCase):
         data = struct.pack('<2L', 0x00000002, 0x00000001)
         self.assertEqual(exif_info.change_rational_to_value(data, 0), "2")
 
+    def test_change_rational_to_f_number(self):
+        exif_data = {"id":0, "type":5, "value":0, "len":1}
+        exif_info = ExifTagInformation("0th", ">", exif_data)
+        data = (0x00000002, 0x00000001)
+        self.assertEqual(exif_info.change_rational_to_f_number(data), "F2.0")
+
+    def test_change_rational_to_exposure_time(self):
+        exif_data = {"id":0, "type":5, "value":0, "len":1}
+        exif_info = ExifTagInformation("0th", ">", exif_data)
+        data = (0x00000002, 0x00000001)
+        self.assertEqual(exif_info.change_rational_to_exposure_time(data), "2.000000sec")
+
+    def test_change_rational_to_exposure_bias(self):
+        exif_data = {"id":0, "type":5, "value":0, "len":1}
+        exif_info = ExifTagInformation("0th", ">", exif_data)
+        data = (0x00000002, 0x00000001)
+        self.assertEqual(exif_info.change_rational_to_exposure_bias(data), "+2.0")
+        exif_data = {"id":0, "type":5, "value":0, "len":1}
+        exif_info = ExifTagInformation("0th", ">", exif_data)
+        data = (0x00000000, 0x00000000)
+        self.assertEqual(exif_info.change_rational_to_exposure_bias(data), "0.0")
+        exif_data = {"id":0, "type":5, "value":0, "len":1}
+        exif_info = ExifTagInformation("0th", ">", exif_data)
+        data = (-2, 1)
+        self.assertEqual(exif_info.change_rational_to_exposure_bias(data), "-2.0")
+
+    def test_change_rational_to_focal_len(self):
+        exif_data = {"id":0, "type":5, "value":0, "len":1}
+        exif_info = ExifTagInformation("0th", ">", exif_data)
+        data = (0x00000002, 0x00000001)
+        self.assertEqual(exif_info.change_rational_to_focal_len(data), "2mm")
+
+    def test_change_rational_to_distance(self):
+        exif_data = {"id":0, "type":5, "value":0, "len":1}
+        exif_info = ExifTagInformation("0th", ">", exif_data)
+        data = (0x00000002, 0x00000001)
+        self.assertEqual(exif_info.change_rational_to_distance(data), "2.0m")
+
+    def test_change_rational_to_aperture(self):
+        exif_data = {"id":0, "type":5, "value":0, "len":1}
+        exif_info = ExifTagInformation("0th", ">", exif_data)
+        data = (0x00000002, 0x00000001)
+        self.assertEqual(exif_info.change_rational_to_aperture(data), "F2.0 (F2.000000)")
+
+
 if __name__ == '__main__':
     unittest.main()

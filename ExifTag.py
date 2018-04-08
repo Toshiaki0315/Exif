@@ -1,4 +1,5 @@
 import struct
+import math
 
 class ExifTagInformation:
 
@@ -341,18 +342,68 @@ class ExifTagInformation:
 
         return self.change_value_to_string()
 
-    def change_rational_to_value(self, data, offset):
-        value_offset = offset + self.__value
-        # RATIONALの場合は、1つめに分子、2つめに分母が入っているので、lengthを2倍にして値を取得している
-        values = struct.unpack_from(self.__byte_order+str(self.__length*2)+"L", data, value_offset)
-        if values[0] == 0 and values[1] == 0:
-            value_string = "{:d}.{:d}".format(values[0], values[1])
-        elif values[1] == 1:
-            value_string = "{:d}".format(values[0])
-        else:
-            value_string = "{:d} / {:d}".format(values[0], values[1])
+    def change_rational_to_f_number(self, values):
+        return "F{:.1f}".format(values[0]/values[1])
 
-        return value_string
+    def change_rational_to_exposure_time(self, values):
+        print(hex(values[0]))
+        print(hex(values[1]))
+        return "{:f}sec".format(values[0]/values[1])
+
+    def change_rational_to_exposure_bias(self, values):
+        if values[1] == 0:
+            return "0.0"
+        
+        exposure_bias = values[0]/values[1]
+        if exposure_bias > 0.0:
+            return "+{:.1f}".format(exposure_bias)
+
+        return "{:.1f}".format(exposure_bias)
+
+    def change_rational_to_focal_len(self, values):
+        return "{:.0f}mm".format(values[0]/values[1])
+        
+    def change_rational_to_distance(self, values):
+        return "{:.1f}m".format(values[0]/values[1])
+    
+    def change_rational_to_aperture(self, values):
+        div = math.exp((values[0]/values[1])*math.log(2.0)/2)
+        value = math.pow(math.sqrt(2.0), values[0]/values[1])
+        return "F{:.1f} (F{:f})".format(div, value)
+
+    def change_rational_to_string(self, values):
+        # RATIONALの場合は、1つめに分子、2つめに分母が入っているので、lengthを2倍にして値を取得している
+        if values[0] == 0 and values[1] == 0:
+            return "{:d}.{:d}".format(values[0], values[1])
+        
+        if values[1] == 1:
+            return "{:d}".format(values[0])
+        
+        return "{:d} / {:d}".format(values[0], values[1])
+
+        
+    def change_rational_to_value(self, data, offset):
+        values = struct.unpack_from(self.__byte_order+str(self.__length*2)+"L", data, offset + self.__value)
+
+        if self.__id == 0x829a: # Exposure Time
+            return self.change_rational_to_exposure_time(values)
+        
+        if self.__id == 0x9204: # Exposure Bias
+            return self.change_rational_to_exposure_bias(values)
+        
+        if self.__id == 0x829d: # F Number
+            return self.change_rational_to_f_number(values)
+        
+        if self.__id == 0x920a: # Focal Len
+            return self.change_rational_to_focal_len(values)
+        
+        if self.__id == 0x9206: # Distance
+            return self.change_rational_to_distance(values)
+
+        if self.__id == 0x9205 or self.__id == 0x9202: # Max Aperture / Aperture
+            return self.change_rational_to_aperture(values)
+
+        return self.change_rational_to_string(values)
 
     def change_value(self, data, offset):
         # valueには4byte以下であれば値、5byte以上であればオフセットが入ってる
