@@ -346,8 +346,6 @@ class ExifTagInformation:
         return "F{:.1f}".format(values[0]/values[1])
 
     def change_rational_to_exposure_time(self, values):
-        print(hex(values[0]))
-        print(hex(values[1]))
         return "{:f}sec".format(values[0]/values[1])
 
     def change_rational_to_exposure_bias(self, values):
@@ -369,7 +367,7 @@ class ExifTagInformation:
     def change_rational_to_aperture(self, values):
         div = math.exp((values[0]/values[1])*math.log(2.0)/2)
         value = math.pow(math.sqrt(2.0), values[0]/values[1])
-        return "F{:.1f} (F{:f})".format(div, value)
+        return "F{:.1f} (F{:f})".format(value, div)
 
     def change_rational_to_string(self, values):
         # RATIONALの場合は、1つめに分子、2つめに分母が入っているので、lengthを2倍にして値を取得している
@@ -381,15 +379,32 @@ class ExifTagInformation:
         
         return "{:d} / {:d}".format(values[0], values[1])
 
+    def change_rational_to_shutter_speed(self, values):
+        div = math.exp((values[0]/values[1])*math.log(2.0)/-1)
+        value = math.pow(2.0, values[0]/values[1])
+        return "1/{:.0f} ({:f}sec)".format(value, div)
         
+        
+    def change_rational_to_brightness(self, values):
+        div = math.exp((values[0]/values[1])*math.log(2.0))
+        return "{:f}(B/NK)".format(div)
+        
+    def change_srational_to_string(self, values):
+        if values[0] == 0 and values[1] == 0:
+            return "{:d}.{:d}".format(values[0], values[1])
+        
+        if values[1] == 1:
+            return "{:d}".format(values[0])
+        
+        return "{:f}".format(values[0]/values[1])
+
+
     def change_rational_to_value(self, data, offset):
+        # RATIONALの場合は、1つめに分子、2つめに分母が入っているので、lengthを2倍にして値を取得している
         values = struct.unpack_from(self.__byte_order+str(self.__length*2)+"L", data, offset + self.__value)
 
         if self.__id == 0x829a: # Exposure Time
             return self.change_rational_to_exposure_time(values)
-        
-        if self.__id == 0x9204: # Exposure Bias
-            return self.change_rational_to_exposure_bias(values)
         
         if self.__id == 0x829d: # F Number
             return self.change_rational_to_f_number(values)
@@ -405,6 +420,20 @@ class ExifTagInformation:
 
         return self.change_rational_to_string(values)
 
+    def change_srational_to_value(self, data, offset):
+        # RATIONALの場合は、1つめに分子、2つめに分母が入っているので、lengthを2倍にして値を取得している
+        values = struct.unpack_from(self.__byte_order+str(self.__length*2)+"l", data, offset + self.__value)
+
+        if self.__id == 0x9204: # Exposure Bias
+            return self.change_rational_to_exposure_bias(values)
+
+        if self.__id == 0x9201: # Shutter Speed
+            return self.change_rational_to_shutter_speed(values)
+
+        if self.__id == 0x9203: # Brightness
+            return self.change_rational_to_brightness(values)
+        return self.change_srational_to_string(values)
+
     def change_value(self, data, offset):
         # valueには4byte以下であれば値、5byte以上であればオフセットが入ってる
         # オフセットはtiffヘッダの先頭からのオフセット
@@ -419,6 +448,9 @@ class ExifTagInformation:
 
         if self.EXIF_TAG_FORMAT[self.__type] == "RATIONAL":
             return self.change_rational_to_value(data, offset)
+
+        if self.EXIF_TAG_FORMAT[self.__type] == "SRATIONAL":
+            return self.change_srational_to_value(data, offset)
 
         return str(self.__value)
 

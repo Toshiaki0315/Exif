@@ -165,6 +165,18 @@ class ExifParserTest(unittest.TestCase):
         data = (0x00000002, 0x00000001)
         self.assertEqual(exif_info.change_rational_to_aperture(data), "F2.0 (F2.000000)")
 
+    def test_change_rational_to_shutter_speed(self):
+        exif_data = {"id":0, "type":5, "value":0, "len":1}
+        exif_info = ExifTagInformation("0th", ">", exif_data)
+        data = (0x00000002, 0x00000001)
+        self.assertEqual(exif_info.change_rational_to_shutter_speed(data), "1/4 (0.250000sec)")
+
+    def test_change_rational_to_brightness(self):
+        exif_data = {"id":0, "type":5, "value":0, "len":1}
+        exif_info = ExifTagInformation("0th", ">", exif_data)
+        data = (0x00000002, 0x00000001)
+        self.assertEqual(exif_info.change_rational_to_brightness(data), "4.000000(B/NK)")
+
 
 if __name__ == '__main__':
     unittest.main()
