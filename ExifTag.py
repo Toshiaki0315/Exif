@@ -272,7 +272,6 @@ class ExifTagInformation:
             
 
     def change_value_to_string(self):
-
         if self.__ifd not in self.TAG_LIST:
             return str(self.__value)
 
@@ -326,8 +325,38 @@ class ExifTagInformation:
             return data.decode(encoding='ascii', errors='replace')[start_number:end_number].strip('\x00')
         return self.change_int_to_string()
 
+    def change_undefined_components_conf(self):
+        value_string =""
+        for shift_length in {0, 8, 16, 24}:
+            value = (self.__value >> shift_length)&0x000000ff
+            if value == 1:
+                value_string += "Y"
+            if value == 2:
+                value_string += "Cb"
+            if value == 3:
+                value_string += "Cr"
+            if value == 4:
+                value_string += "R"
+            if value == 5:
+                value_string += "G"
+            if value == 6:
+                value_string += "B"
+        return value_string
+
 
     def change_undefined_to_value(self, data, offset):
+        if self.__id == 0xa300: # ファイル・ソース
+            return self.change_value_to_string()
+        
+        if self.__id == 0x927c: # Makernote
+            return "省略"
+        
+        if self.__id == 0xc4a5: # PIM II/PIM III
+            return "検討中"
+        
+        if self.__id == 0x9101: # Components Conf
+            return self.change_undefined_components_conf()
+
         if self.is_offset():
 #            fmt = str(length)+"s"
 #            value_string = "".join(map(str, struct.unpack_from(fmt, data, offset+value)))
