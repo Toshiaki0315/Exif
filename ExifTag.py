@@ -322,27 +322,16 @@ class ExifTagInformation:
 
     def change_ascii_to_value(self, data):
         if self.is_offset():
-            start_number = self.__base_offset+self.__value
-            end_number   = self.__base_offset+self.__value+self.__length
+            start_number = self.__base_offset + self.__value
+            end_number   = start_number + self.__length
             return data.decode(encoding='ascii', errors='replace')[start_number:end_number].strip('\x00')
         return self.change_int_to_string()
 
     def change_undefined_components_conf(self):
+        value_chars = {0:"", 1:"Y", 2:"Cb", 3:"Cr", 4:"R", 5:"G", 6:"B"}
         value_string =""
         for shift_length in {0, 8, 16, 24}:
-            value = (self.__value >> shift_length)&0x000000ff
-            if value == 1:
-                value_string += "Y"
-            if value == 2:
-                value_string += "Cb"
-            if value == 3:
-                value_string += "Cr"
-            if value == 4:
-                value_string += "R"
-            if value == 5:
-                value_string += "G"
-            if value == 6:
-                value_string += "B"
+            value_string += value_chars[(self.__value >> shift_length)&0x000000ff]
         return value_string
 
 

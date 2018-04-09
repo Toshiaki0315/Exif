@@ -7,10 +7,10 @@ class ParseExifData:
     BYTE_ORDER_BIG_ENDIAN    = ">"
     BYTE_ORDER_ERROR         = "ERR"
 
-    __offset = {"0th":0, "1st":0, "exif":0, "gps":0, "intr":0}
-    __byte_order      = BYTE_ORDER_NONE
+    __offset       = {"0th":0, "1st":0, "exif":0, "gps":0, "intr":0}
+    __byte_order   = BYTE_ORDER_NONE
     __base_offset  = -1
-    __data = None
+    __data         = None
 
     _exif_info = {}
 
@@ -35,19 +35,23 @@ class ParseExifData:
 
         return
 
+    def get_offset_from_data(self, offset):
+        return struct.unpack_from(self.__byte_order+"L", self.__data, offset)[0]
+
     def get_0th_offset(self):
-        self.__offset["0th"] = struct.unpack_from(self.__byte_order+"L", self.__data, self.__base_offset+4)[0]
+        self.__offset["0th"] = self.get_offset_from_data(self.__base_offset + 4)
         return
  
-    def get_1st_ifd_offset(self, tag_num):
-        self.__offset["1st"] = struct.unpack_from(self.__byte_order+"L", self.__data, self.__base_offset+self.__offset["0th"]+2+tag_num*12)[0]
+    def get_1st_offset(self, tag_num):
+        self.__offset["1st"] = self.get_offset_from_data(self.__base_offset + self.__offset["0th"] + 2 + tag_num * 12) 
         return
 
-    def get_offset(self, ifd):
+    def ifd_offset(self, ifd):
         return self.__offset[ifd]
 
     def get_tag_number(self, ifd):
-        return struct.unpack_from(self.__byte_order+"H", self.__data, self.__base_offset+self.__offset[ifd])[0]
+        offset = self.__base_offset+self.__offset[ifd]
+        return struct.unpack_from(self.__byte_order+"H", self.__data, offset)[0]
     
     def get_tag_info(self, ifd, count):
         tag_id_ifds = {0x8769:"exif", 0x8825:"gps", 0xA005:"intr"}
@@ -73,7 +77,7 @@ class ParseExifData:
 
         self.parse_ifd("0th")
 
-        self.get_1st_ifd_offset(len(self._exif_info["0th"]))
+        self.get_1st_offset(self.exif_info_length("0th"))
         
         return
 

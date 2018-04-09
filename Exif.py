@@ -20,14 +20,15 @@ def adjust_message(pos, digit, message):
 
 def display_message(exif_data, data, ifd):
 
-    print('-------------------- {:s} --------------------'.format(ifd) )
-    print('{:4s} IFD Offset = 0x{:08x}'.format(ifd, exif_data.get_offset(ifd)))
-    print('{:4s} Tag Number = {:d}'.format(ifd, exif_data.exif_info_length(ifd)))
-    
     byte_order  = exif_data.exif_byte_order()
     base_offset = exif_data.exif_base_offset()
+    exif_info_length = exif_data.exif_info_length(ifd)
 
-    for count in range(exif_data.exif_info_length(ifd)):
+    print('-------------------- {:s} --------------------'.format(ifd) )
+    print('{:4s} IFD Offset = 0x{:08x}'.format(ifd, exif_data.ifd_offset(ifd)))
+    print('{:4s} Tag Number = {:d}'.format(ifd, exif_info_length))
+    
+    for count in range(exif_info_length):
         
         exif_info = eti(ifd, byte_order, base_offset, exif_data.exif_info(ifd, count))
 
@@ -52,7 +53,7 @@ def exif(argv):
         if ifd == "0th":
             exif_data.parse_0th_ifd()
             display_message(exif_data, data, ifd)
-        elif exif_data.get_offset(ifd) > 0:
+        elif exif_data.ifd_offset(ifd) > 0:
             exif_data.parse_ifd(ifd)
             display_message(exif_data, data, ifd)
 
