@@ -3,19 +3,21 @@ import math
 
 class ExifTagInformation:
 
-    __ifd        = ""
-    __byte_order = ""
-    __id         = 0
-    __type       = 0
-    __length     = 0
-    __value      = 0
-    def __init__(self, ifd, byte_order, exif_info):
-        self.__ifd        = ifd
-        self.__byte_order = byte_order
-        self.__id         = exif_info["id"]
-        self.__type       = exif_info["type"]
-        self.__length     = exif_info["len"]
-        self.__value      = exif_info["value"]
+    __ifd         = ""
+    __byte_order  = ""
+    __base_offset = 0
+    __id          = 0
+    __type        = 0
+    __length      = 0
+    __value       = 0
+    def __init__(self, ifd, byte_order, base_offset, exif_info):
+        self.__ifd         = ifd
+        self.__byte_order  = byte_order
+        self.__base_offset = base_offset
+        self.__id          = exif_info["id"]
+        self.__type        = exif_info["type"]
+        self.__length      = exif_info["len"]
+        self.__value       = exif_info["value"]
 
     EXIF_TAG_ID = {
         # TIFF
@@ -318,10 +320,10 @@ class ExifTagInformation:
         return self.__value.to_bytes(self.__length, byteorder=byte_oders[self.__byte_order]).decode("ascii").strip('\x00')
 
 
-    def change_ascii_to_value(self, data, offset):
+    def change_ascii_to_value(self, data):
         if self.is_offset():
-            start_number = offset+self.__value
-            end_number   = offset+self.__value+self.__length
+            start_number = self.__base_offset+self.__value
+            end_number   = self.__base_offset+self.__value+self.__length
             return data.decode(encoding='ascii', errors='replace')[start_number:end_number].strip('\x00')
         return self.change_int_to_string()
 
@@ -344,7 +346,7 @@ class ExifTagInformation:
         return value_string
 
 
-    def change_undefined_to_value(self, data, offset):
+    def change_undefined_to_value(self, data):
         if self.__id == 0xa300: # ファイル・ソース
             return self.change_value_to_string()
         
@@ -365,7 +367,7 @@ class ExifTagInformation:
         return self.change_int_to_string()
 
 
-    def change_short_to_value(self, data, offset):
+    def change_short_to_value(self, data):
         if self.is_offset():
             return str(self.__value)
 
@@ -428,9 +430,11 @@ class ExifTagInformation:
         return "{:f}".format(values[0]/values[1])
 
 
-    def change_rational_to_value(self, data, offset):
+    def change_rational_to_value(self, data):
         # RATIONALの場合は、1つめに分子、2つめに分母が入っているので、lengthを2倍にして値を取得している
-        values = struct.unpack_from(self.__byte_order+str(self.__length*2)+"L", data, offset + self.__value)
+        values = struct.unpack_from(self.__byte_order+str(self.__length*2)+"L", \
+                                    data, \
+                                    self.__base_offset + self.__value)
 
         if self.__id == 0x829a: # Exposure Time
             return self.change_rational_to_exposure_time(values)
@@ -449,9 +453,11 @@ class ExifTagInformation:
 
         return self.change_rational_to_string(values)
 
-    def change_srational_to_value(self, data, offset):
+    def change_srational_to_value(self, data):
         # RATIONALの場合は、1つめに分子、2つめに分母が入っているので、lengthを2倍にして値を取得している
-        values = struct.unpack_from(self.__byte_order+str(self.__length*2)+"l", data, offset + self.__value)
+        values = struct.unpack_from(self.__byte_order+str(self.__length*2)+"l", \
+                                    data, \
+                                    self.__base_offset + self.__value)
 
         if self.__id == 0x9204: # Exposure Bias
             return self.change_rational_to_exposure_bias(values)
@@ -463,23 +469,23 @@ class ExifTagInformation:
             return self.change_rational_to_brightness(values)
         return self.change_srational_to_string(values)
 
-    def change_value(self, data, offset):
+    def change_value(self, data):
         # valueには4byte以下であれば値、5byte以上であればオフセットが入ってる
         # オフセットはtiffヘッダの先頭からのオフセット
         if self.EXIF_TAG_FORMAT[self.__type] == "ASCII":
-            return self.change_ascii_to_value( data, offset )
+            return self.change_ascii_to_value(data)
         
         if self.EXIF_TAG_FORMAT[self.__type] == "UNDEFINED":
-            return self.change_undefined_to_value(data, offset)
+            return self.change_undefined_to_value(data)
         
         if self.EXIF_TAG_FORMAT[self.__type] == "SHORT":
-            return self.change_short_to_value(data, offset)
+            return self.change_short_to_value(data)
 
         if self.EXIF_TAG_FORMAT[self.__type] == "RATIONAL":
-            return self.change_rational_to_value(data, offset)
+            return self.change_rational_to_value(data)
 
         if self.EXIF_TAG_FORMAT[self.__type] == "SRATIONAL":
-            return self.change_srational_to_value(data, offset)
+            return self.change_srational_to_value(data)
 
         return str(self.__value)
 

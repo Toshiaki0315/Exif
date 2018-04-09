@@ -1,6 +1,6 @@
 import sys
-from ExifParser import ParseExifData
-from ExifTag import ExifTagInformation
+from ExifParser import ParseExifData as ped
+from ExifTag import ExifTagInformation as eti
 import unicodedata
 
 ADJUST_LEFT  = 1
@@ -22,20 +22,21 @@ def display_message(exif_data, data, ifd):
 
     print('-------------------- {:s} --------------------'.format(ifd) )
     print('{:4s} IFD Offset = 0x{:08x}'.format(ifd, exif_data.get_offset(ifd)))
-    print('{:4s} Tag Number = {:d}'.format(ifd, len(exif_data._exif_info[ifd])))
+    print('{:4s} Tag Number = {:d}'.format(ifd, exif_data.exif_info_length(ifd)))
     
-    byte_order = exif_data.exif_byte_order()
-    for count in range(len(exif_data._exif_info[ifd])):
+    byte_order  = exif_data.exif_byte_order()
+    base_offset = exif_data.exif_base_offset()
+
+    for count in range(exif_data.exif_info_length(ifd)):
         
-        exif_info = ExifTagInformation(ifd, byte_order, exif_data._exif_info[ifd][count])
-        value = exif_info.change_value( data, exif_data._base_offset)
+        exif_info = eti(ifd, byte_order, base_offset, exif_data.exif_info(ifd, count))
 
         print('{:s} : [{:s} len = {:6d}] (0x{:08x}) : {:s}'.format( \
                                                 adjust_message(ADJUST_LEFT, 30, exif_info.change_id_to_string()), \
                                                 adjust_message(ADJUST_LEFT, 10, exif_info.change_format_to_string()), \
                                                 exif_info.exif_tag_length(), \
                                                 exif_info.exif_tag_value(), \
-                                                value))
+                                                exif_info.change_value(data)))
 
 
 def exif(argv):
@@ -43,7 +44,7 @@ def exif(argv):
         data = infile.read()
 
     ifds = ["0th", "1st", "exif", "gps", "intr"]
-    exif_data = ParseExifData(data)
+    exif_data = ped(data)
 
     exif_data.check_exif_string()
 
