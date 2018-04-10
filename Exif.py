@@ -42,20 +42,20 @@ def display_message(exif_data, data, ifd):
 
 def exif(argv):
     with open(argv[0], 'rb') as infile:
-        data = infile.read()
+        read_jpeg_data = infile.read()
 
     ifds = ["0th", "1st", "exif", "gps", "intr"]
-    exif_data = ped(data)
+    exif_header = ped(read_jpeg_data)
 
-    exif_data.check_exif_string()
+    exif_header.check_exif_string()
 
     for ifd in ifds:
         if ifd == "0th":
-            exif_data.parse_0th_ifd()
-            display_message(exif_data, data, ifd)
-        elif exif_data.ifd_offset(ifd) > 0:
-            exif_data.parse_ifd(ifd)
-            display_message(exif_data, data, ifd)
+            exif_header.parse_0th_tag_info()
+            display_message(exif_header, read_jpeg_data, ifd)
+        elif exif_header.ifd_offset(ifd) > 0:
+            exif_header.parse_ifd_tag_info(ifd)
+            display_message(exif_header, read_jpeg_data, ifd)
 
 
 if __name__ == '__main__':
