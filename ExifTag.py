@@ -265,20 +265,20 @@ class ExifTagInformation:
     def change_id_to_string(self):
 
         if self.__ifd not in self.TAG_LIST:
-            return "unkown IFD"
+            return "Unkown IFD"
         
         if self.__id in self.TAG_LIST[self.__ifd]:
             return self.TAG_LIST[self.__ifd][self.__id]["mes"]
 
-        return "unkown ID"
+        return "Unkown ID"
             
 
     def change_value_to_string(self):
         if self.__ifd not in self.TAG_LIST:
-            return "unkown ifd"
+            return "Unkown IFD"
 
         if self.__id not in self.TAG_LIST[self.__ifd]:
-            return "unkown id"
+            return "Unkown ID"
 
         if "value" not in self.TAG_LIST[self.__ifd][self.__id]:
             return str(self.__value)
@@ -286,7 +286,7 @@ class ExifTagInformation:
         if self.__value in self.TAG_LIST[self.__ifd][self.__id]["value"]:
             return self.TAG_LIST[self.__ifd][self.__id]["value"][self.__value]
 
-        return "unkown value"
+        return "Unkown value"
         
 
     EXIF_TAG_FORMAT = {
@@ -312,7 +312,7 @@ class ExifTagInformation:
     def change_format_to_string(self):
         if self.__type in self.EXIF_TAG_FORMAT:
             return self.EXIF_TAG_FORMAT[self.__type]
-        return "unkown format"
+        return "Unkown Format"
 
 
     def change_int_to_string(self):

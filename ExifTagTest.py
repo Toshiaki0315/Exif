@@ -6,7 +6,7 @@ class ExifParserTest(unittest.TestCase):
     def test_change_id_to_string(self):
         exif_data = {"id":0x0000, "type":0, "value":0, "len":0}
         exif_info = eti("0th", ">", 0, exif_data)
-        self.assertEqual(exif_info.change_id_to_string(), "unkown ID")
+        self.assertEqual(exif_info.change_id_to_string(), "Unkown ID")
         exif_data = {"id":0x0100, "type":0, "value":0, "len":0}
         exif_info = eti("exif", ">", 0, exif_data)
         self.assertEqual(exif_info.change_id_to_string(), "画像の幅")
@@ -18,13 +18,13 @@ class ExifParserTest(unittest.TestCase):
         self.assertEqual(exif_info.change_id_to_string(), "画像の幅")
         exif_data = {"id":0x0100, "type":0, "value":0, "len":0}
         exif_info = eti("gps", ">", 0, exif_data)
-        self.assertEqual(exif_info.change_id_to_string(), "unkown ID")
+        self.assertEqual(exif_info.change_id_to_string(), "Unkown ID")
         exif_data = {"id":0x0001, "type":0, "value":0, "len":0}
         exif_info = eti("gps", ">", 0, exif_data)
         self.assertEqual(exif_info.change_id_to_string(), "北緯(N) or 南緯(S)")
         exif_data = {"id":0x0100, "type":0, "value":0, "len":0}
         exif_info = eti("intr", ">", 0, exif_data)
-        self.assertEqual(exif_info.change_id_to_string(), "unkown ID")
+        self.assertEqual(exif_info.change_id_to_string(), "Unkown ID")
         exif_data = {"id":0x0001, "type":0, "value":0, "len":0}
         exif_info = eti("intr", ">", 0, exif_data)
         self.assertEqual(exif_info.change_id_to_string(), "互換性インデックス")
@@ -38,7 +38,7 @@ class ExifParserTest(unittest.TestCase):
         self.assertEqual(exif_info.change_value_to_string(), "JPEG 圧縮(サムネイルのみ)")
         exif_data = {"id":0x0103, "type":0, "value":0, "len":0}
         exif_info = eti("0th", ">", 0, exif_data)
-        self.assertEqual(exif_info.change_value_to_string(), "unkown value")
+        self.assertEqual(exif_info.change_value_to_string(), "Unkown value")
         exif_data = {"id":0x1001, "type":0, "value":1, "len":0}
         exif_info = eti("intr", ">", 0, exif_data)
         self.assertEqual(exif_info.change_value_to_string(), "1")
@@ -46,7 +46,7 @@ class ExifParserTest(unittest.TestCase):
     def test_change_format_to_string(self):
         exif_data = {"id":0, "type":0, "value":0, "len":0}
         exif_info = eti("0th", ">", 0, exif_data)
-        self.assertEqual(exif_info.change_format_to_string(), "unkown format")
+        self.assertEqual(exif_info.change_format_to_string(), "Unkown Format")
         exif_data = {"id":0, "type":1, "value":0, "len":0}
         exif_info = eti("0th", ">", 0, exif_data)
         self.assertEqual(exif_info.change_format_to_string(), "BYTE")
