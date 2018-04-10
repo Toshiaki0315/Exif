@@ -275,7 +275,7 @@ class ExifTagInformation:
 
     def change_value_to_string(self):
         if self.__ifd not in self.TAG_LIST:
-            return str(self.__value)
+            return "unkown ifd"
 
         if self.__id not in self.TAG_LIST[self.__ifd]:
             return "unkown id"
