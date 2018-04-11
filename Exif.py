@@ -18,26 +18,26 @@ def adjust_message(pos, digit, message):
 
     return ' ' * digit + message
 
-def display_message(exif_data, data, ifd):
+def display_message(exif_header, read_jpeg_data, ifd):
 
-    byte_order  = exif_data.exif_byte_order()
-    base_offset = exif_data.exif_base_offset()
-    exif_info_length = exif_data.exif_info_length(ifd)
+    byte_order  = exif_header.exif_byte_order()
+    base_offset = exif_header.exif_base_offset()
+    exif_info_length = exif_header.exif_info_length(ifd)
 
     print('-------------------- {:s} --------------------'.format(ifd) )
-    print('{:4s} IFD Offset = 0x{:08x}'.format(ifd, exif_data.ifd_offset(ifd)))
+    print('{:4s} IFD Offset = 0x{:08x}'.format(ifd, exif_header.ifd_offset(ifd)))
     print('{:4s} Tag Number = {:d}'.format(ifd, exif_info_length))
     
     for count in range(exif_info_length):
         
-        exif_info = eti(ifd, byte_order, base_offset, exif_data.exif_info(ifd, count))
+        exif_info = eti(ifd, byte_order, base_offset, exif_header.exif_info(ifd, count))
 
         print('{:s} : [{:s} len = {:6d}] (0x{:08x}) : {:s}'.format( \
                                                 adjust_message(ADJUST_LEFT, 30, exif_info.change_id_to_string()), \
                                                 adjust_message(ADJUST_LEFT, 10, exif_info.change_format_to_string()), \
                                                 exif_info.exif_tag_length(), \
                                                 exif_info.exif_tag_value(), \
-                                                exif_info.change_value(data)))
+                                                exif_info.change_value(read_jpeg_data)))
 
 
 def exif(argv):

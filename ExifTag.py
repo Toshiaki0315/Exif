@@ -289,29 +289,29 @@ class ExifTagInformation:
         return "Unkown value"
         
 
-    EXIF_TAG_FORMAT = {
-        1:"BYTE",
-        2:"ASCII",
-        3:"SHORT",
-        4:"LONG",
-        5:"RATIONAL",
-        6:"SBYTE",
-        7:"UNDEFINED",
-        8:"SSHORT",
-        9:"SLONG",
-        10:"SRATIONAL",
-        11:"SINGLE FLOAT",
-        12:"DOUBLE FLOAT",
-    }
-
     def is_offset(self):
         if self.__length <= 4:
             return False
         return True
     
     def change_format_to_string(self):
-        if self.__type in self.EXIF_TAG_FORMAT:
-            return self.EXIF_TAG_FORMAT[self.__type]
+        exif_tag_format_lists = {
+            1:"BYTE",
+            2:"ASCII",
+            3:"SHORT",
+            4:"LONG",
+            5:"RATIONAL",
+            6:"SBYTE",
+            7:"UNDEFINED",
+            8:"SSHORT",
+            9:"SLONG",
+            10:"SRATIONAL",
+            11:"SINGLE FLOAT",
+            12:"DOUBLE FLOAT",
+        }
+        
+        if self.__type in exif_tag_format_lists:
+            return exif_tag_format_lists[self.__type]
         return "Unkown Format"
 
 
@@ -320,11 +320,11 @@ class ExifTagInformation:
         return self.__value.to_bytes(self.__length, byteorder=byte_oders[self.__byte_order]).decode("ascii").strip('\x00')
 
 
-    def change_ascii_to_value(self, data):
+    def change_ascii_to_value(self, jpeg_data):
         if self.is_offset():
             start_number = self.__base_offset + self.__value
             end_number   = start_number + self.__length
-            return data.decode(encoding='ascii', errors='replace')[start_number:end_number].strip('\x00')
+            return jpeg_data.decode(encoding='ascii', errors='replace')[start_number:end_number].strip('\x00')
         return self.change_int_to_string()
 
     def change_undefined_components_conf(self):
@@ -334,29 +334,33 @@ class ExifTagInformation:
             value_string += value_chars[(self.__value >> shift_length)&0x000000ff]
         return value_string
 
-
-    def change_undefined_to_value(self, data):
-        if self.__id == 0xa300: # ファイル・ソース
-            return self.change_value_to_string()
+    def change_value_to_makernote(self):
+        return "省略"
         
-        if self.__id == 0x927c: # Makernote
-            return "省略"
+    def chage_value_to_pim(self):
+        return "未実装"
+    
+    
+    def change_undefined_to_value(self, jpeg_data):
+        change_undefined_lists = {
+            0xa300:self.change_value_to_string,           # ファイル・ソース
+            0x927c:self.change_value_to_makernote,        # Makernote
+            0xc4a5:self.chage_value_to_pim,               # PIM II/PIM III
+            0x9101:self.change_undefined_components_conf, # Components Conf
+        }
         
-        if self.__id == 0xc4a5: # PIM II/PIM III
-            return "検討中"
-        
-        if self.__id == 0x9101: # Components Conf
-            return self.change_undefined_components_conf()
-
+        if self.__id in change_undefined_lists:
+            return change_undefined_lists[self.__id]()
+            
         if self.is_offset():
 #            fmt = str(length)+"s"
-#            value_string = "".join(map(str, struct.unpack_from(fmt, data, offset+value)))
+#            value_string = "".join(map(str, struct.unpack_from(fmt, jpeg_data, offset+value)))
             return ""
 
         return self.change_int_to_string()
 
 
-    def change_short_to_value(self, data):
+    def change_short_to_value(self, jpeg_data):
         if self.is_offset():
             return str(self.__value)
 
@@ -419,62 +423,58 @@ class ExifTagInformation:
         return "{:f}".format(values[0]/values[1])
 
 
-    def change_rational_to_value(self, data):
+    def change_rational_to_value(self, jpeg_data):
+        change_rational_lists = {
+            0x829a:self.change_rational_to_exposure_time, # Exposure Time
+            0x829d:self.change_rational_to_f_number,         # F Number
+            0x920a:self.change_rational_to_focal_len,        # Focal Len
+            0x9206:self.change_rational_to_distance,         # Distance
+            0x9205:self.change_rational_to_aperture,         # Max Aperture
+            0x9202:self.change_rational_to_aperture,         # Aperture            
+        }
         # RATIONALの場合は、1つめに分子、2つめに分母が入っているので、lengthを2倍にして値を取得している
         values = struct.unpack_from(self.__byte_order+str(self.__length*2)+"L", \
-                                    data, \
+                                    jpeg_data, \
                                     self.__base_offset + self.__value)
 
-        if self.__id == 0x829a: # Exposure Time
-            return self.change_rational_to_exposure_time(values)
-        
-        if self.__id == 0x829d: # F Number
-            return self.change_rational_to_f_number(values)
-        
-        if self.__id == 0x920a: # Focal Len
-            return self.change_rational_to_focal_len(values)
-        
-        if self.__id == 0x9206: # Distance
-            return self.change_rational_to_distance(values)
-
-        if self.__id == 0x9205 or self.__id == 0x9202: # Max Aperture / Aperture
-            return self.change_rational_to_aperture(values)
-
+        if self.__id in change_rational_lists:
+            return change_rational_lists[self.__id](values)
+            
         return self.change_rational_to_string(values)
 
-    def change_srational_to_value(self, data):
+    def change_srational_to_value(self, jpeg_data):
+        change_srational_lists = {
+            0x9204:self.change_rational_to_exposure_bias,         # Exposure Bias
+            0x9201:self.change_rational_to_shutter_speed,         # Shutter Speed
+            0x9203:self.change_rational_to_brightness,            # Brightness
+        }
         # RATIONALの場合は、1つめに分子、2つめに分母が入っているので、lengthを2倍にして値を取得している
         values = struct.unpack_from(self.__byte_order+str(self.__length*2)+"l", \
-                                    data, \
+                                    jpeg_data, \
                                     self.__base_offset + self.__value)
 
-        if self.__id == 0x9204: # Exposure Bias
-            return self.change_rational_to_exposure_bias(values)
+        if self.__id in change_srational_lists:
+            return change_srational_lists[self.__id](values)
 
-        if self.__id == 0x9201: # Shutter Speed
-            return self.change_rational_to_shutter_speed(values)
-
-        if self.__id == 0x9203: # Brightness
-            return self.change_rational_to_brightness(values)
         return self.change_srational_to_string(values)
 
-    def change_value(self, data):
-        # valueには4byte以下であれば値、5byte以上であればオフセットが入ってる
-        # オフセットはtiffヘッダの先頭からのオフセット
-        if self.EXIF_TAG_FORMAT[self.__type] == "ASCII":
-            return self.change_ascii_to_value(data)
-        
-        if self.EXIF_TAG_FORMAT[self.__type] == "UNDEFINED":
-            return self.change_undefined_to_value(data)
-        
-        if self.EXIF_TAG_FORMAT[self.__type] == "SHORT":
-            return self.change_short_to_value(data)
-
-        if self.EXIF_TAG_FORMAT[self.__type] == "RATIONAL":
-            return self.change_rational_to_value(data)
-
-        if self.EXIF_TAG_FORMAT[self.__type] == "SRATIONAL":
-            return self.change_srational_to_value(data)
+    def change_value(self, jpeg_data):
+        change_value_lists = {
+            # 1:byte
+            2:self.change_ascii_to_value,
+            3:self.change_short_to_value,
+            # 4:long
+            5:self.change_rational_to_value,
+            # 6:sbyte
+            7:self.change_undefined_to_value,
+            # 8:sshort
+            # 9:slong
+            10:self.change_srational_to_value,
+            # 11: single float
+            # 12: double float
+        }
+        if self.__type in change_value_lists:
+            return change_value_lists[self.__type](jpeg_data)
 
         return str(self.__value)
 
