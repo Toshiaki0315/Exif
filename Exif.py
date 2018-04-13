@@ -19,7 +19,7 @@ def adjust_message(pos, digit, message):
     return ' ' * digit + message
 
 def display_message(exif_header, read_jpeg_data, ifd):
-
+    
     byte_order  = exif_header.exif_byte_order()
     base_offset = exif_header.exif_base_offset()
     exif_info_length = exif_header.exif_info_length(ifd)
