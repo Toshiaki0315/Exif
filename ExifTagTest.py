@@ -177,6 +177,23 @@ class ExifParserTest(unittest.TestCase):
         data = (0x00000002, 0x00000001)
         self.assertEqual(exif_info.change_rational_to_brightness(data), "4.000000(B/NK)")
 
+    def test_value_to_pim(self):
+        exif_data = {"id":0, "type":5, "value":0, "len":1}
+        exif_info = eti("0th", ">", 0, exif_data)
+        data = struct.pack('>7s1B1L2B2H1L1H1L', b'PrintIM', 0x00, 0x30313233, 0x00, 0x00, 0x0002, 0x0001, 0x0000000a, 0x0002, 0x0000000b )
+        self.assertEqual( exif_info.value_to_pim_header( data ), 'PrintIM' )
+        self.assertEqual( exif_info.value_to_pim_version( data ), '0123' )
+        self.assertEqual( exif_info.value_to_pim_entry_count( data ), 2 )
+        self.assertEqual( exif_info.value_to_pim_entry_id( data, 0 ), 0x0001 )
+        self.assertEqual( exif_info.value_to_pim_entry_value( data, 0 ), 0x0000000a )
+        self.assertEqual( exif_info.value_to_pim_entry_id( data, 1 ), 0x0002 )
+        self.assertEqual( exif_info.value_to_pim_entry_value( data, 1 ), 0x0000000b )
 
+    def test_change_value_to_pim(self):
+        exif_data = {"id":0, "type":5, "value":0, "len":1}
+        exif_info = eti("0th", ">", 0, exif_data)
+        data = struct.pack('>7s1B1L2H1L1H1L', b'PrintIM', 0x00, 0x30313233, 0x0002, 0x0001, 0x0000000a, 0x0002, 0x0000000b )
+        self.assertEqual( exif_info.change_value_to_pim(data), 'PrintIM : 0123 : length = 1\n\t--- PrintIM Data ---\n\t  0000 : 000a0002' )
+    
 if __name__ == '__main__':
     unittest.main()

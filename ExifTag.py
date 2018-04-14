@@ -334,23 +334,50 @@ class ExifTagInformation:
             value_string += value_chars[(self.__value >> shift_length)&0x000000ff]
         return value_string
 
-    def change_value_to_makernote(self):
+    def change_value_to_makernote(self, jpeg_data):
         return "省略"
-        
-    def chage_value_to_pim(self):
-        return "未実装"
+
+    def value_to_pim_header( self, jpeg_data ):
+        value = struct.unpack_from(self.__byte_order+"8s", jpeg_data, self.__base_offset + self.__value)[0]
+        return value.decode(encoding='ascii', errors='replace').strip('\x00')
+    
+    def value_to_pim_version( self, jpeg_data ):
+        byte_oders = {"<":'little', ">":'big'}
+        value = struct.unpack_from(self.__byte_order+"1L", jpeg_data, self.__base_offset + self.__value + 8)[0]
+        return value.to_bytes(4, byteorder=byte_oders[self.__byte_order]).decode("ascii").strip('\x00')
+
+    def value_to_pim_entry_count( self, jpeg_data ):
+        return struct.unpack_from(self.__byte_order+"1h", jpeg_data, self.__base_offset + self.__value + 14)[0]
+
+    def value_to_pim_entry_id( self, jpeg_data, count ):
+        return struct.unpack_from(self.__byte_order+"1H1L", jpeg_data, self.__base_offset + self.__value + 16 + count * 6)[0]
+    
+    def value_to_pim_entry_value( self, jpeg_data, count ):
+        return struct.unpack_from(self.__byte_order+"1H1L", jpeg_data, self.__base_offset + self.__value + 16 + count * 6)[1]
+
+    def change_value_to_pim(self, jpeg_data):
+        pim_header = self.value_to_pim_header(jpeg_data)
+        pim_version = self.value_to_pim_version(jpeg_data)
+        pim_entry_count = self.value_to_pim_entry_count(jpeg_data)
+        pim_string = "{:s} : {:4s} : length = {:d}\n\t--- PrintIM Data ---".format(pim_header, pim_version, pim_entry_count)
+        for i in range(pim_entry_count):
+            pim_string = pim_string + "\n\t  {:04x} : {:08x}".format(self.value_to_pim_entry_id(jpeg_data, i), self.value_to_pim_entry_value(jpeg_data, i))
+        return pim_string
     
     
     def change_undefined_to_value(self, jpeg_data):
         change_undefined_lists = {
             0xa300:self.change_value_to_string,           # ファイル・ソース
             0x927c:self.change_value_to_makernote,        # Makernote
-            0xc4a5:self.chage_value_to_pim,               # PIM II/PIM III
+            0xc4a5:self.change_value_to_pim,               # PIM II/PIM III
             0x9101:self.change_undefined_components_conf, # Components Conf
         }
         
         if self.__id in change_undefined_lists:
-            return change_undefined_lists[self.__id]()
+            if self.is_offset():
+                return change_undefined_lists[self.__id](jpeg_data)
+            else:
+                return change_undefined_lists[self.__id]()
             
         if self.is_offset():
 #            fmt = str(length)+"s"
