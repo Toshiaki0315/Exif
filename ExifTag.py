@@ -365,11 +365,22 @@ class ExifTagInformation:
         return pim_string
     
     
+    def undefined_data_to_string(self, jpeg_data):
+        value_list = struct.unpack_from(self.__byte_order+str(self.__length)+"B",
+                                    jpeg_data,
+                                    self.__base_offset + self.__value)
+        value_string = "\n\t"
+        for i in range(len(value_list)):
+            value_string = value_string + "0x{:02x}, ".format(value_list[i])
+            if ((i+1) % 10) is 0:
+                value_string = value_string + "\n\t"
+        return value_string
+        
     def change_undefined_to_value(self, jpeg_data):
         change_undefined_lists = {
             0xa300:self.change_value_to_string,           # ファイル・ソース
             0x927c:self.change_value_to_makernote,        # Makernote
-            0xc4a5:self.change_value_to_pim,               # PIM II/PIM III
+            0xc4a5:self.change_value_to_pim,              # PIM II/PIM III
             0x9101:self.change_undefined_components_conf, # Components Conf
         }
         
@@ -380,9 +391,7 @@ class ExifTagInformation:
                 return change_undefined_lists[self.__id]()
             
         if self.is_offset():
-#            fmt = str(length)+"s"
-#            value_string = "".join(map(str, struct.unpack_from(fmt, jpeg_data, offset+value)))
-            return ""
+            return self.undefined_data_to_string(jpeg_data)
 
         return self.change_int_to_string()
 

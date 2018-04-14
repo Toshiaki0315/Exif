@@ -195,5 +195,15 @@ class ExifParserTest(unittest.TestCase):
         data = struct.pack('>7s1B1L2H1L1H1L', b'PrintIM', 0x00, 0x30313233, 0x0002, 0x0001, 0x0000000a, 0x0002, 0x0000000b )
         self.assertEqual( exif_info.change_value_to_pim(data), 'PrintIM : 0123 : length = 1\n\t--- PrintIM Data ---\n\t  0000 : 000a0002' )
     
+    def test_undefined_data_to_string(self):
+        exif_data = {"id":0, "type":5, "value":0, "len":5}
+        exif_info = eti("0th", ">", 0, exif_data)
+        data = struct.pack('>5B', 0x01, 0x02, 0x03, 0x04, 0x05)
+        self.assertEqual( exif_info.undefined_data_to_string(data), '\n\t0x01, 0x02, 0x03, 0x04, 0x05, ' )
+        exif_data = {"id":0, "type":5, "value":0, "len":11}
+        exif_info = eti("0th", ">", 0, exif_data)
+        data = struct.pack('>11B', 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x10, 0x0a)
+        self.assertEqual( exif_info.undefined_data_to_string(data), '\n\t0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x10, \n\t0x0a, ' )
+    
 if __name__ == '__main__':
     unittest.main()
