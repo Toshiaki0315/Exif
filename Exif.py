@@ -47,7 +47,10 @@ def exif(argv):
     ifds = ["0th", "1st", "exif", "gps", "intr"]
     exif_header = ped(read_jpeg_data)
 
-    exif_header.check_exif_string()
+    if exif_header.check_exif_string() <= 0:
+        print("not found exif header!")
+        return
+        
 
     for ifd in ifds:
         if ifd == "0th":
