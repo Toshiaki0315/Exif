@@ -262,23 +262,29 @@ class ExifTagInformation:
         "intr":INTR_TAG_ID,
     }
     
+    def __check_ifd_and_id(self):
+        if self.__ifd not in self.TAG_LIST:
+            return False, "Unkown IFD"
+        
+        if self.__id not in self.TAG_LIST[self.__ifd]:
+            return False, "Unkown ID"
+        
+        return True, ""
+                
     def change_id_to_string(self):
 
-        if self.__ifd not in self.TAG_LIST:
-            return "Unkown IFD"
-        
-        if self.__id in self.TAG_LIST[self.__ifd]:
-            return self.TAG_LIST[self.__ifd][self.__id]["mes"]
+        check_result = self.__check_ifd_and_id()
+        if check_result[0] is False:
+            return check_result[1]
 
-        return "Unkown ID"
-            
+        return self.TAG_LIST[self.__ifd][self.__id]["mes"]
+
 
     def change_value_to_string(self):
-        if self.__ifd not in self.TAG_LIST:
-            return "Unkown IFD"
 
-        if self.__id not in self.TAG_LIST[self.__ifd]:
-            return "Unkown ID"
+        check_result = self.__check_ifd_and_id()
+        if check_result[0] is False:
+            return check_result[1]
 
         if "value" not in self.TAG_LIST[self.__ifd][self.__id]:
             return str(self.__value)
@@ -317,7 +323,8 @@ class ExifTagInformation:
 
     def change_int_to_string(self):
         byte_oders = {"<":'little', ">":'big'}
-        return self.__value.to_bytes(self.__length, byteorder=byte_oders[self.__byte_order]).decode("ascii").strip('\x00')
+        return self.__value.to_bytes(self.__length,
+                                     byteorder=byte_oders[self.__byte_order]).decode("ascii").strip('\x00')
 
 
     def change_ascii_to_value(self, jpeg_data):

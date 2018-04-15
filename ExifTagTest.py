@@ -28,7 +28,7 @@ class ExifParserTest(unittest.TestCase):
         exif_data = {"id":0x0001, "type":0, "value":0, "len":0}
         exif_info = eti("intr", ">", 0, exif_data)
         self.assertEqual(exif_info.change_id_to_string(), "互換性インデックス")
-
+        
     def test_change_value_to_string(self):
         exif_data = {"id":0x0103, "type":0, "value":1, "len":0}
         exif_info = eti("0th", ">", 0, exif_data)
