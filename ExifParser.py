@@ -88,6 +88,9 @@ class ParseExifData:
         return self._exif_header_info[ifd][count]
     
     def exif_info_length(self, ifd):
+        if ifd not in self._exif_header_info:
+            return 0
+
         return len(self._exif_header_info[ifd])
     
     def exif_base_offset(self):

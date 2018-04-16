@@ -162,6 +162,18 @@ class ExifParserTest(unittest.TestCase):
         exif_header.ifd_1st_offset(1)
         exif_header.get_tag_info("0th", 0)
         self.assertEqual(exif_header.ifd_offset("intr"), 0xaabbccdd)
-        
+
+    def test_parse_ifd_tag_info(self):
+        exif_header = ParseExifData(struct.pack('<4s2B2s2BL3H3L1H', b'Exif', 0, 0, b'II', 0x00, 0x2a, 0x00000008, 0x0001, 0x8825, 0x0003, 0x11223344, 26, 0xaabbccdd, 0x0))
+        exif_header.check_exif_string()
+        exif_header.ifd_0th_offset()
+        exif_header.ifd_1st_offset(1)
+        exif_header.get_tag_info("0th", 0)
+        self.assertEqual(exif_header.ifd_offset("gps"), 26)
+        self.assertEqual(exif_header.tag_number("gps"), 0x0)
+        for count in range(exif_header.tag_number("gps")):
+            exif_header.get_tag_info(ifd, count)
+        self.assertEqual(exif_header.exif_info_length("gps"), 0)
+                                                    
 if __name__ == '__main__':
     unittest.main()
