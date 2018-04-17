@@ -12,7 +12,7 @@ class ParseExifData:
     __base_offset  = -1
     __jpeg_data    = None
 
-    _exif_header_info = {}
+    __exif_header_info = {}
 
     def __init__(self, read_jpeg_data):
         self.__jpeg_data = read_jpeg_data
@@ -57,7 +57,7 @@ class ParseExifData:
         tag_id_ifds = {0x8769:"exif", 0x8825:"gps", 0xA005:"intr"}
 
         tag_info = struct.unpack_from(self.__byte_order+"2H2L", self.__jpeg_data, self.__base_offset+self.__offset[ifd]+2+count*12)
-        self._exif_header_info.setdefault(ifd, [] ).append({"id":tag_info[0], "type":tag_info[1], "len":tag_info[2], "value":tag_info[3]})
+        self.__exif_header_info.setdefault(ifd, [] ).append({"id":tag_info[0], "type":tag_info[1], "len":tag_info[2], "value":tag_info[3]})
 
         if tag_info[0] in tag_id_ifds:
             self.__offset[tag_id_ifds[tag_info[0]]] = tag_info[3]
@@ -85,13 +85,13 @@ class ParseExifData:
         return self.__byte_order
     
     def exif_info(self, ifd, count):
-        return self._exif_header_info[ifd][count]
+        return self.__exif_header_info[ifd][count]
     
     def exif_info_length(self, ifd):
-        if ifd not in self._exif_header_info:
+        if ifd not in self.__exif_header_info:
             return 0
 
-        return len(self._exif_header_info[ifd])
+        return len(self.__exif_header_info[ifd])
     
     def exif_base_offset(self):
         return self.__base_offset
