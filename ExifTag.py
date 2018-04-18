@@ -306,7 +306,7 @@ class ExifTagInformation:
     
     def change_format_to_string(self)->str:
         """フォーマットタイプを文字列に変換する"""
-        exif_tag_format_lists = {
+        exif_tag_formats = {
             1:"BYTE",
             2:"ASCII",
             3:"SHORT",
@@ -321,8 +321,8 @@ class ExifTagInformation:
             12:"DOUBLE FLOAT",
         }
         
-        if self.__type in exif_tag_format_lists:
-            return exif_tag_format_lists[self.__type]
+        if self.__type in exif_tag_formats:
+            return exif_tag_formats[self.__type]
         return "Unkown Format"
 
 
@@ -353,41 +353,41 @@ class ExifTagInformation:
         """メーカーノートを返す（予定）"""
         return "省略"
 
-    def value_to_pim_header(self, jpeg_data:bytes)->str:
+    def _value_to_pim_header(self, jpeg_data:bytes)->str:
         """PIMの文字列を返す"""
         value = struct.unpack_from(self.__byte_order+"8s", jpeg_data, self.__base_offset + self.__value)[0]
         return value.decode(encoding='ascii', errors='replace').strip('\x00')
     
-    def value_to_pim_version(self, jpeg_data:bytes)->str:
+    def _value_to_pim_version(self, jpeg_data:bytes)->str:
         """PIMのバージョンを返す"""
         byte_oders = {"<":'little', ">":'big'}
         value = struct.unpack_from(self.__byte_order+"1L", jpeg_data, self.__base_offset + self.__value + 8)[0]
         return value.to_bytes(4, byteorder=byte_oders[self.__byte_order]).decode("ascii").strip('\x00')
 
-    def value_to_pim_entry_count(self, jpeg_data:bytes)->int:
+    def _value_to_pim_entry_count(self, jpeg_data:bytes)->int:
         """PIMのデータの数を返す"""
         return struct.unpack_from(self.__byte_order+"1h", jpeg_data, self.__base_offset + self.__value + 14)[0]
 
-    def value_to_pim_entry_id(self, jpeg_data:bytes, count:int)->int:
+    def _value_to_pim_entry_id(self, jpeg_data:bytes, count:int)->int:
         """指定されたPIMのIDを返す"""
         return struct.unpack_from(self.__byte_order+"1H1L", jpeg_data, self.__base_offset + self.__value + 16 + count * 6)[0]
     
-    def value_to_pim_entry_value(self, jpeg_data:bytes, count:int)->int:
-        """指定されたPIMの設定を返す"""
+    def _value_to_pim_entry_value(self, jpeg_data:bytes, count:int)->int:
+        """指定されたPIMの設定値を返す"""
         return struct.unpack_from(self.__byte_order+"1H1L", jpeg_data, self.__base_offset + self.__value + 16 + count * 6)[1]
 
     def change_value_to_pim(self, jpeg_data:bytes)->str:
         """PIMのデータを文字列に変換する"""
-        pim_header = self.value_to_pim_header(jpeg_data)
-        pim_version = self.value_to_pim_version(jpeg_data)
-        pim_entry_count = self.value_to_pim_entry_count(jpeg_data)
+        pim_header = self._value_to_pim_header(jpeg_data)
+        pim_version = self._value_to_pim_version(jpeg_data)
+        pim_entry_count = self._value_to_pim_entry_count(jpeg_data)
         pim_string = "{:s} : {:4s} : length = {:d}\n\t--- PrintIM Data ---".format(pim_header, pim_version, pim_entry_count)
         for i in range(pim_entry_count):
-            pim_string = pim_string + "\n\t  {:04x} : {:08x}".format(self.value_to_pim_entry_id(jpeg_data, i), self.value_to_pim_entry_value(jpeg_data, i))
+            pim_string = pim_string + "\n\t  {:04x} : {:08x}".format(self._value_to_pim_entry_id(jpeg_data, i), self._value_to_pim_entry_value(jpeg_data, i))
         return pim_string
     
     
-    def undefined_data_to_string(self, jpeg_data:bytes)->str:
+    def _undefined_data_to_string(self, jpeg_data:bytes)->str:
         """UNDEFINEDの値（不明）を文字列に変換する"""
         value_list = struct.unpack_from(self.__byte_order+str(self.__length)+"B",
                                     jpeg_data,
@@ -401,21 +401,21 @@ class ExifTagInformation:
         
     def change_undefined_to_value(self, jpeg_data:bytes)->str:
         """UNDEFINEDの値を文字列に変換する"""
-        change_undefined_lists = {
+        change_undefined_functions= {
             0xa300:self.change_value_to_string,           # ファイル・ソース
             0x927c:self.change_value_to_makernote,        # Makernote
             0xc4a5:self.change_value_to_pim,              # PIM II/PIM III
             0x9101:self.change_undefined_components_conf, # Components Conf
         }
         
-        if self.__id in change_undefined_lists:
+        if self.__id in change_undefined_functions:
             if self.is_offset():
-                return change_undefined_lists[self.__id](jpeg_data)
+                return change_undefined_functions[self.__id](jpeg_data)
             else:
-                return change_undefined_lists[self.__id]()
+                return change_undefined_functions[self.__id]()
             
         if self.is_offset():
-            return self.undefined_data_to_string(jpeg_data)
+            return self._undefined_data_to_string(jpeg_data)
 
         return self.change_int_to_string()
 
@@ -498,7 +498,7 @@ class ExifTagInformation:
     def change_rational_to_value(self, jpeg_data:bytes)->str:
         """RATIONALタイプの値を文字列に変更する"""
 
-        change_rational_lists = {
+        change_rational_functions = {
             0x829a:self.change_rational_to_exposure_time, # Exposure Time
             0x829d:self.change_rational_to_f_number,         # F Number
             0x920a:self.change_rational_to_focal_len,        # Focal Len
@@ -511,15 +511,15 @@ class ExifTagInformation:
                                     jpeg_data, \
                                     self.__base_offset + self.__value)
 
-        if self.__id in change_rational_lists:
-            return change_rational_lists[self.__id](values)
+        if self.__id in change_rational_functions:
+            return change_rational_functions[self.__id](values)
             
         return self.change_rational_to_string(values)
 
     def change_srational_to_value(self, jpeg_data:bytes)->str:
         """SRATIONALタイプの値を文字列に変更する"""
 
-        change_srational_lists = {
+        change_srational_functions = {
             0x9204:self.change_rational_to_exposure_bias,         # Exposure Bias
             0x9201:self.change_rational_to_shutter_speed,         # Shutter Speed
             0x9203:self.change_rational_to_brightness,            # Brightness
@@ -529,14 +529,14 @@ class ExifTagInformation:
                                     jpeg_data, \
                                     self.__base_offset + self.__value)
 
-        if self.__id in change_srational_lists:
-            return change_srational_lists[self.__id](values)
+        if self.__id in change_srational_functions:
+            return change_srational_functions[self.__id](values)
 
         return self.change_srational_to_string(values)
 
-    def change_value(self, jpeg_data:bytes)->str:
+    def change_tag_value_to_string(self, jpeg_data:bytes)->str:
         """タグの値を文字列に変換する"""
-        change_value_lists = {
+        change_value_functions = {
             # 1:byte
             2:self.change_ascii_to_value,
             3:self.change_short_to_value,
@@ -550,8 +550,8 @@ class ExifTagInformation:
             # 11: single float
             # 12: double float
         }
-        if self.__type in change_value_lists:
-            return change_value_lists[self.__type](jpeg_data)
+        if self.__type in change_value_functions:
+            return change_value_functions[self.__type](jpeg_data)
 
         return str(self.__value)
 

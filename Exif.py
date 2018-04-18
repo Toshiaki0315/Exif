@@ -40,7 +40,7 @@ def display_exif_info(exif_header:ped, read_jpeg_data:bytes, ifd:str)->None:
                                                 adjust_string(ADJUST_LEFT, 10, exif_info.change_format_to_string()), \
                                                 exif_info.exif_tag_length(), \
                                                 exif_info.exif_tag_value(), \
-                                                exif_info.change_value(read_jpeg_data)))
+                                                exif_info.change_tag_value_to_string(read_jpeg_data)))
 
 
 def exif(argv:list)->None:
