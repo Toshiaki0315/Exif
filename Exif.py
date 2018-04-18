@@ -20,7 +20,7 @@ def adjust_string(pos:int, digit:int, message:str)->str:
 
     return ' ' * digit + message
 
-def display_exif_info(exif_header:ped, read_jpeg_data:bytes, ifd:str):
+def display_exif_info(exif_header:ped, read_jpeg_data:bytes, ifd:str)->None:
     """Exifの解析結果を表示する"""
     
     byte_order  = exif_header.exif_byte_order()
@@ -43,7 +43,7 @@ def display_exif_info(exif_header:ped, read_jpeg_data:bytes, ifd:str):
                                                 exif_info.change_value(read_jpeg_data)))
 
 
-def exif(argv:list):
+def exif(argv:list)->None:
     """Exifの解析をおこなう"""
 
     with open(argv[0], 'rb') as infile:

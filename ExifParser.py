@@ -14,7 +14,8 @@ class ParseExifData:
 
     __exif_header_info = {}
 
-    def __init__(self, read_jpeg_data):
+    def __init__(self, read_jpeg_data:bytes)->None:
+        """JPEGデータを受け取る"""
         self.__jpeg_data = read_jpeg_data
 
     def check_exif_string(self)->int:
@@ -25,7 +26,7 @@ class ParseExifData:
             self.check_byte_order()
         return self.__base_offset
     
-    def check_byte_order(self)->str:
+    def check_byte_order(self)->None:
         """JPEGデータからバイトオーダーを探し出して返す"""
         bye_orders = {b'MM':self.BYTE_ORDER_BIG_ENDIAN, b'II':self.BYTE_ORDER_LITTLE_ENDIAN}
 
@@ -41,17 +42,15 @@ class ParseExifData:
         """JPEGデータからオフセット値を取り出す"""
         return struct.unpack_from(self.__byte_order+"L", self.__jpeg_data, offset)[0]
 
-    def ifd_0th_offset(self):
+    def ifd_0th_offset(self)->None:
         """JPEGデータから0thのオフセット値を取り出す"""
         
         self.__offset["0th"] = self.get_offset_from_data(self.__base_offset + 4)
-        return
  
-    def ifd_1st_offset(self, tag_num:int):
+    def ifd_1st_offset(self, tag_num:int)->None:
         """JPEGデータから1stのオフセット値を取り出す"""
         
         self.__offset["1st"] = self.get_offset_from_data(self.__base_offset + self.__offset["0th"] + 2 + tag_num * 12) 
-        return
 
     def ifd_offset(self, ifd:str)->int:
         """指定されたifdのオフセット値を返す"""
@@ -74,14 +73,12 @@ class ParseExifData:
 
         return tag_info
 
-    def parse_ifd_tag_info(self, ifd:str):
+    def parse_ifd_tag_info(self, ifd:str)->None:
         """Exifの指定されたTAGを解析する"""
         for count in range(self.tag_number(ifd)):
             self.get_tag_info(ifd, count)
-        
-        return
 
-    def parse_0th_tag_info(self):
+    def parse_0th_tag_info(self)->None:
         """Exifの0th TAGを解析する"""
         self.ifd_0th_offset()
 
