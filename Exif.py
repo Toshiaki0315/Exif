@@ -6,7 +6,7 @@ import unicodedata
 ADJUST_LEFT  = 1
 ADJUST_RIGHT = 2
 
-def adjust_string(pos:int, digit:int, message:str)->str:
+def _adjust_string(pos:int, digit:int, message:str)->str:
     """文字列を左右どちらかに寄せる"""
 
     for character in message:
@@ -19,6 +19,7 @@ def adjust_string(pos:int, digit:int, message:str)->str:
         return message + ' ' * digit
 
     return ' ' * digit + message
+
 
 def display_exif_info(exif_header:ped, read_jpeg_data:bytes, ifd:str)->None:
     """Exifの解析結果を表示する"""
@@ -36,8 +37,8 @@ def display_exif_info(exif_header:ped, read_jpeg_data:bytes, ifd:str)->None:
         exif_info = eti(ifd, byte_order, base_offset, exif_header.exif_info(ifd, count))
 
         print('{:s} : [{:s} len = {:6d}] (0x{:08x}) : {:s}'.format( \
-                                                adjust_string(ADJUST_LEFT, 30, exif_info.change_id_to_string()), \
-                                                adjust_string(ADJUST_LEFT, 10, exif_info.change_format_to_string()), \
+                                                _adjust_string(ADJUST_LEFT, 30, exif_info.change_id_to_string()), \
+                                                _adjust_string(ADJUST_LEFT, 10, exif_info.change_format_to_string()), \
                                                 exif_info.exif_tag_length(), \
                                                 exif_info.exif_tag_value(), \
                                                 exif_info.change_tag_value_to_string(read_jpeg_data)))
@@ -56,7 +57,6 @@ def exif(argv:list)->None:
         print("not found exif header!")
         return
         
-
     for ifd in ifds:
         if ifd == "0th":
             exif_header.parse_0th_tag_info()

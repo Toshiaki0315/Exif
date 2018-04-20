@@ -172,7 +172,7 @@ class ExifParserTest(unittest.TestCase):
         self.assertEqual(exif_header.ifd_offset("gps"), 26)
         self.assertEqual(exif_header.tag_number("gps"), 0x0)
         for count in range(exif_header.tag_number("gps")):
-            exif_header.get_tag_info(ifd, count)
+            exif_header.get_tag_info("gps", count)
         self.assertEqual(exif_header.exif_info_length("gps"), 0)
                                                     
 if __name__ == '__main__':
