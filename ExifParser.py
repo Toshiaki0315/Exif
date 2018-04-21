@@ -27,6 +27,7 @@ class ParseExifData:
         if self.__base_offset >= 0:
             self.__base_offset += (len('Exif')+2)
             self.check_byte_order()
+
         return self.__base_offset
 
 
@@ -40,6 +41,7 @@ class ParseExifData:
             self.__byte_order = bye_orders[byte_order[0]]
         else:
             self.__byte_order = self.BYTE_ORDER_ERROR
+            self.__base_offset = 0
 
 
     def get_offset_from_data(self, offset:int)->int:
