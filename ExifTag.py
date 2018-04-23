@@ -67,7 +67,7 @@ class ExifTagInformation:
         return "Unkown value"
         
 
-    def is_offset(self)->bool:
+    def __is_offset(self)->bool:
         """値がオフセットかどうかチェックする"""
 
         if self.__length <= 4:
@@ -109,7 +109,7 @@ class ExifTagInformation:
     def change_ascii_to_value(self, jpeg_data:bytes)->str:
         """ASCIIの値を文字列に変換する"""
 
-        if self.is_offset():
+        if self.__is_offset():
             start_number = self.__base_offset + self.__value
             end_number   = start_number + self.__length
             return jpeg_data.decode(encoding='ascii', errors='replace')[start_number:end_number].strip('\x00')
@@ -216,11 +216,11 @@ class ExifTagInformation:
         }
         
         if self.__id in change_undefined_functions:
-            if self.is_offset():
+            if self.__is_offset():
                 return change_undefined_functions[self.__id](jpeg_data)
             return change_undefined_functions[self.__id]()
             
-        if self.is_offset():
+        if self.__is_offset():
             return self._undefined_data_to_string(jpeg_data)
 
         return self.change_int_to_string()
@@ -229,7 +229,7 @@ class ExifTagInformation:
     def change_short_to_value(self, jpeg_data:bytes)->str:
         """SHORTの値を文字列に変換する"""
 
-        if self.is_offset():
+        if self.__is_offset():
             return str(self.__value)
 
         return self.change_value_to_string()
